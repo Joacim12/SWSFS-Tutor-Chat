@@ -14,7 +14,7 @@ import javax.websocket.server.ServerEndpoint;
  * @author jvetterlain
  */
 @ApplicationScoped
-@ServerEndpoint("/")
+@ServerEndpoint("/chat")
 public class Server {
     @OnOpen
     public void onOpen(Session session) {

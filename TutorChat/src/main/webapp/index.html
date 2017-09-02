@@ -1,5 +1,4 @@
 <!DOCTYPE html>
- 
 <html>
     <head>
         <title>Echo Chamber</title>
@@ -31,7 +30,7 @@
                     return;
                 }
                 // Create a new instance of the websocket
-                webSocket = new WebSocket("ws://localhost:8084/echo");
+                webSocket = new WebSocket("ws://localhost:8084/");
                 /**
                  * Binds functions to the listeners for the websocket.
                  */
@@ -67,6 +66,5 @@
             }
            
         </script>
-       
     </body>
 </html>

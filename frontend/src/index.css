@@ -1,5 +1,19 @@
+@import url('https://fonts.googleapis.com/css?family=VT323');
+
 body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: 'VT323', monospace !important;
 }
+
+::-webkit-input-placeholder {
+    font-family: 'VT323', monospace !important;
+}
+
+::-moz-placeholder {
+    font-family: 'VT323', monospace !important;
+}
+
+:-ms-input-placeholder {
+    font-family: 'VT323', monospace !important;
+ }

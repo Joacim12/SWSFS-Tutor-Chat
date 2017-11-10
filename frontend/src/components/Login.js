@@ -6,7 +6,6 @@ class Login extends Component {
     state = {
         username: '',
     }
-
     handleInput = (event) => {
         this.setState({
             [event.target.name]: event.target.value
@@ -28,6 +27,15 @@ class Login extends Component {
                                   pathname: "/TutorChat/chat",
                                   username: this.state.username,
                               }}>Connect</Link>
+                        <Link style={{margin:"10px"}}className="btn btn-warning" value="Create user " username={this.state.username}
+                              to={{
+                                  pathname: "/TutorChat/chat",
+                                  username: this.state.username,
+                              }}>Create user</Link>
+                        <br/>
+                        <hr/>
+                        <h4>Tutors online:0</h4>
+
                     </div>
                     <div className="col"></div>
                 </div>

@@ -1,0 +1,6 @@
+entity\User.class
+decoder\MessageDecoder.class
+entity\Message.class
+model\MessageHandler.class
+model\ChatControl.class
+decoder\MessageEncoder.class

@@ -18,8 +18,8 @@ class Chat extends Component {
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            let connection = new WebSocket("ws://vetterlain.dk:8082/TutorChat/chat/" + this.state.username);
-            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("ws://vetterlain.dk:8082/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
@@ -49,10 +49,11 @@ class Chat extends Component {
                 this.setState({usersNeedHelp: []})
             }
         } else if (res.command === 'setTutor') {
+            let chatMessages = this.state.textArea;
+            chatMessages += '\nServer:' + res.content + ' er nu forbundet'
             this.setState({
                 to: res.content,
-                textArea: [...this.state.textArea, 'Server:' + res.content +
-                ' er nu forbundet']
+                textArea: chatMessages
             })
         } else if (res.command === 'connectedUsers') {
             this.setState({users: res.content.split(";")})
@@ -132,7 +133,7 @@ class Chat extends Component {
         }
         return (
             <div>
-                <h1>TutorChat</h1>
+                <h1>Hello: {this.state.username}</h1>
                 <hr/>
                 <div className="row align-items-start">
                     <div className="col-10">
@@ -142,7 +143,7 @@ class Chat extends Component {
                                   value={this.state.textArea}
                                   disabled
                                   cols="100" rows="15"
-                                  // placeholder="Type your question to get connected"
+                            // placeholder="Type your question to get connected"
                         />
                         <br/>
                         <div className="form-group row">
@@ -158,7 +159,13 @@ class Chat extends Component {
                         </div>
                     </div>
                     <div className="col-2">
-                        <UserList users={this.state.users} handleList={this.handleList}/>
+                        {
+                            this.state.users ?
+
+                                <UserList users={this.state.users} handleList={this.handleList}/>
+                                :
+                                ""
+                        }
                         {this.renderNeedsHelp()}
                     </div>
                 </div>

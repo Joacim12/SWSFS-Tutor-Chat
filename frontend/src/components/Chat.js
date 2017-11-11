@@ -18,8 +18,8 @@ class Chat extends Component {
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            // let connection = new WebSocket("ws://vetterlain.dk:8082/TutorChat/chat/" + this.state.username);
-            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("ws://vetterlain.dk:8082/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
@@ -56,7 +56,11 @@ class Chat extends Component {
                 textArea: chatMessages
             })
         } else if (res.command === 'connectedUsers') {
-            this.setState({users: res.content.split(";")})
+            if (res.content.split(";")[0] === "") {
+                this.setState({users: []})
+            } else {
+                this.setState({users: res.content.split(";")})
+            }
         }
         else {
             let chatMessages = this.state.textArea;
@@ -124,49 +128,65 @@ class Chat extends Component {
         }
     }
 
+    handleDc = (e) => {
+        let msg = JSON.stringify({
+            'to': 'server',
+            'from': this.state.username,
+            'command': 'release',
+            'content': e.target.id
+
+        })
+        this.setState({to: ''})
+        this.state.connection.send(msg);
+    }
+
 
     render = () => {
+        console.log(this.state.users)
         if (this.state.username === undefined || this.state.disconnected) {
             return (
                 <Redirect to={'/TutorChat/'}/>
             )
         }
         return (
-            <div>
+            <div className="container-fluid">
                 <h1>Hello: {this.state.username}</h1>
                 <hr/>
-                <div className="row align-items-start">
-                    <div className="col-10">
+                <div className="row">
+                    <div className="col-9">
                         <textarea className="form-control"
                                   id="chat"
                                   onChange={this.scroll}
                                   value={this.state.textArea}
+                                  style={{
+                                      backgroundColor: "#f0ad4e",
+                                      boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
+                                  }}
                                   disabled
                                   cols="100" rows="15"
-                            // placeholder="Type your question to get connected"
+                                  placeholder="Type something!"
                         />
                         <br/>
-                        <div className="form-group row">
-                            <label className="col-1 col-form-label">Question:</label>
-                            <div className="col-11">
+                    </div>
+                    <div className="col-3">
+                        {this.state.users.length > 0 ? <UserList users={this.state.users} handleList={this.handleList}
+                                                                 handleDc={this.handleDc}/> : ""}
+                        {this.renderNeedsHelp()}
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-9">
                             <textarea className="form-control"
+                                      placeholder="Write a message ..."
                                       id="message"
                                       cols="100" rows="3"
                                       onKeyDown={this.handleKeyPress}
                                       value={this.state.message}
+                                      style={{
+                                          backgroundColor: "#f0ad4e",
+                                          boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
+                                      }}
                                       onChange={this.handleChange}/>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-2">
-                        {
-                            this.state.users ?
-
-                                <UserList users={this.state.users} handleList={this.handleList}/>
-                                :
-                                ""
-                        }
-                        {this.renderNeedsHelp()}
                     </div>
                 </div>
                 <br/>

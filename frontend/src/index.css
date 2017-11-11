@@ -6,6 +6,14 @@ body {
     font-family: 'VT323', monospace !important;
 }
 
+input{
+    font-family: 'VT323', monospace !important;
+}
+
+textarea{
+    font-family: 'VT323', monospace !important;
+}
+
 ::-webkit-input-placeholder {
     font-family: 'VT323', monospace !important;
 }

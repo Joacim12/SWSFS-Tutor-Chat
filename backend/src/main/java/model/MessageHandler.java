@@ -84,6 +84,18 @@ public class MessageHandler {
             }
         } else if (message.getCommand().equals("connectedUsers")) {
             findUser(message.getTo()).getSession().getBasicRemote().sendObject(message);
+        } else if (message.getCommand().equals("release")) {
+            User user = findUser(message.getContent());
+            user.setAssignedTutor("");
+            updateUser(user);
+            sendMessage(removeTutor(user.getUsername()));
+            notGettingHelp.put(user, new ArrayList());
+            Message m = new Message();
+            m.setContent(message.getFrom()+" couldn't resolve issue");
+            notGettingHelp.get(user).add(m);
+            System.out.println(notGettingHelp);
+            getConnectedToTutor();
+            sendMessage(getNeedHelp());
         } else if (message.getTo() == null && (!getIsTutor(message.getFrom())) && message.getFrom() != null) {
             if (findUser(message.getFrom()) != null) {
                 notGettingHelp.putIfAbsent(findUser(message.getFrom()), new ArrayList());
@@ -95,6 +107,39 @@ public class MessageHandler {
                 tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
             }
         }
+    }
+    
+    public Message setTutor(Message message, User u) {
+        Message m = new Message();
+        m.setFrom("Server");
+        m.setCommand("setTutor");
+        m.setContent(message.getFrom());
+        m.setTo(u.getUsername());
+        return m;
+    }
+
+    public Message removeTutor(String username) {
+        Message m = new Message();
+        m.setFrom("Server");
+        m.setCommand("setTutor");
+        m.setContent("");
+        m.setTo(username);
+        return m;
+    }
+
+    public Message getNeedHelp() {
+        Message m = new Message();
+        m.setCommand("needHelp");
+        m.setFrom("Server");
+        StringJoiner sj = new StringJoiner(";");
+        notGettingHelp.forEach((user, messages) -> {
+            System.out.println(user + " " + messages);
+            sj.add(user.getUsername() + ":" + messages.get(0).getContent());
+        });
+        if (sj.toString().length() > 1) {
+            m.setContent(sj.toString());
+        }
+        return m;
     }
 
     private void getConnectedToTutor() throws EncodeException, IOException {
@@ -113,34 +158,9 @@ public class MessageHandler {
                     }
                 });
                 m.setContent(sj.toString());
-//                if (sj.toString().length() > 0) {
-                    sendMessage(m);
-//                }
+                sendMessage(m);
             }
         };
-    }
-
-    private Message setTutor(Message message, User u) {
-        Message m = new Message();
-        m.setFrom("Server");
-        m.setCommand("setTutor");
-        m.setContent(message.getFrom());
-        m.setTo(u.getUsername());
-        return m;
-    }
-
-    private Message getNeedHelp() {
-        Message m = new Message();
-        m.setCommand("needHelp");
-        m.setFrom("Server");
-        StringJoiner sj = new StringJoiner(";");
-        notGettingHelp.forEach((user, messages) -> {
-            sj.add(user.getUsername() + ":" + messages.get(0).getContent());
-        });
-        if (sj.toString().length() > 1) {
-            m.setContent(sj.toString());
-        }
-        return m;
     }
 
     private List<User> getTutors() {
@@ -164,6 +184,17 @@ public class MessageHandler {
         return null;
     }
 
+    private User updateUser(User user) {
+        User updatedUser = null;
+        for (User user1 : users) {
+            if (user1.getUsername().equals(user.getUsername())) {
+                user1 = user;
+            }
+            updatedUser = user1;
+        }
+        return updatedUser;
+    }
+
     private User findUser(String username) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
@@ -172,5 +203,7 @@ public class MessageHandler {
         }
         return null;
     }
+    
+     
 
 }

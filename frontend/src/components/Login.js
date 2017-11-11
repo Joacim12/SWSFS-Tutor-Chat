@@ -12,9 +12,16 @@ class Login extends Component {
         })
     }
 
+                // <div className="">
+                //     <i class="material-icons float-left">face</i>
+                //     <h5 className="float-left">Bruger</h5>
+                //     <i className="material-icons float-right">exit_to_app</i>
+                // </div>
     render() {
         return (
             <div>
+                <br/>
+                <h2 className="text-center">Welcome to TutorChat, please login!</h2>
                 <div className="row">
                     <div className="col"></div>
                     <div className="col">
@@ -27,7 +34,8 @@ class Login extends Component {
                                   pathname: "/TutorChat/chat",
                                   username: this.state.username,
                               }}>Connect</Link>
-                        <Link style={{margin:"10px"}}className="btn btn-warning" value="Create user " username={this.state.username}
+                        <Link style={{margin: "10px"}} className="btn btn-warning" value="Create user "
+                              username={this.state.username}
                               to={{
                                   pathname: "/TutorChat/chat",
                                   username: this.state.username,

@@ -15,7 +15,7 @@ class UserList extends Component {
 
     color = (e) => {
         if (e === this.state.active) {
-            return '#f0ad4e';
+            return '#f8f9fa';
         }
     }
 

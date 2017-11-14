@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import {Redirect} from 'react-router-dom'
 import UserList from "./UserList";
+import Navbar from "./Navbar";
+import beep from "./beep.wav"
 
 class Chat extends Component {
 
@@ -18,14 +20,12 @@ class Chat extends Component {
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            let connection = new WebSocket("ws://vetterlain.dk:8082/TutorChat/chat/" + this.state.username);
-            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
             connection.onmessage = this.handleMessage;
         }
-
     }
 
     componentDidUpdate = () => {
@@ -40,8 +40,10 @@ class Chat extends Component {
 
     handleMessage = (e) => {
         let res = JSON.parse(e.data);
+        let date = new Date();
         if (res.command === 'needHelp') {
             if (res && res.content) {
+                new Audio(beep).play();
                 this.setState({
                     usersNeedHelp: res.content.split(";")
                 })
@@ -49,22 +51,27 @@ class Chat extends Component {
                 this.setState({usersNeedHelp: []})
             }
         } else if (res.command === 'setTutor') {
+            new Audio(beep).play();
             let chatMessages = this.state.textArea;
-            chatMessages += '\nServer:' + res.content + ' er nu forbundet'
+            chatMessages += '\n' + res.content + ' connected - ' + date.getHours()+":"+date.getMinutes();
             this.setState({
                 to: res.content,
                 textArea: chatMessages
             })
         } else if (res.command === 'connectedUsers') {
             if (res.content.split(";")[0] === "") {
+                new Audio(beep).play();
                 this.setState({users: []})
             } else {
                 this.setState({users: res.content.split(";")})
             }
         }
         else {
+            if (res.from !== this.state.username) {
+                new Audio(beep).play();
+            }
             let chatMessages = this.state.textArea;
-            chatMessages += "\n" + res.from + ":" + res.content;
+            chatMessages += "\n" + res.from + " - " + date.getHours()+":"+date.getMinutes() + "\n" + res.content;
             this.setState({
                 textArea: chatMessages
             });
@@ -142,40 +149,42 @@ class Chat extends Component {
 
 
     render = () => {
-        console.log(this.state.users)
         if (this.state.username === undefined || this.state.disconnected) {
             return (
                 <Redirect to={'/TutorChat/'}/>
             )
         }
         return (
-            <div className="container-fluid">
-                <h1>Hello: {this.state.username}</h1>
-                <hr/>
-                <div className="row">
-                    <div className="col-9">
+            <div>
+                <Navbar username={this.state.username}/>
+                <div className="container">
+                    <br/>
+                    <div className="row">
+                        <div className="col-9">
                         <textarea className="form-control"
                                   id="chat"
                                   onChange={this.scroll}
                                   value={this.state.textArea}
                                   style={{
-                                      backgroundColor: "#f0ad4e",
+                                      cursor: 'text',
+                                      backgroundColor: "#f8f9fa",
                                       boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
                                   }}
                                   disabled
                                   cols="100" rows="15"
                                   placeholder="Type something!"
                         />
-                        <br/>
+                            <br/>
+                        </div>
+                        <div className="col-3">
+                            {this.state.users.length > 0 ?
+                                <UserList users={this.state.users} handleList={this.handleList}
+                                          handleDc={this.handleDc}/> : ""}
+                            {this.renderNeedsHelp()}
+                        </div>
                     </div>
-                    <div className="col-3">
-                        {this.state.users.length > 0 ? <UserList users={this.state.users} handleList={this.handleList}
-                                                                 handleDc={this.handleDc}/> : ""}
-                        {this.renderNeedsHelp()}
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-9">
+                    <div className="row">
+                        <div className="col-9">
                             <textarea className="form-control"
                                       placeholder="Write a message ..."
                                       id="message"
@@ -183,15 +192,16 @@ class Chat extends Component {
                                       onKeyDown={this.handleKeyPress}
                                       value={this.state.message}
                                       style={{
-                                          backgroundColor: "#f0ad4e",
+                                          backgroundColor: "#f8f9fa",
                                           boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
                                       }}
                                       onChange={this.handleChange}/>
+                        </div>
                     </div>
+                    <br/>
+                    <input className="btn btn-warning" type="button" onClick={() => this.sendMessage('message')}
+                           value='Send message'/>
                 </div>
-                <br/>
-                <input className="btn btn-warning" type="button" onClick={() => this.sendMessage('message')}
-                       value='Send message'/>
             </div>
         );
     }

@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom'
+import Navbar from "./Navbar";
+
 
 class Login extends Component {
 
@@ -12,14 +14,12 @@ class Login extends Component {
         })
     }
 
-                // <div className="">
-                //     <i class="material-icons float-left">face</i>
-                //     <h5 className="float-left">Bruger</h5>
-                //     <i className="material-icons float-right">exit_to_app</i>
-                // </div>
+
     render() {
+
         return (
             <div>
+                <Navbar/>
                 <br/>
                 <h2 className="text-center">Welcome to TutorChat, please login!</h2>
                 <div className="row">

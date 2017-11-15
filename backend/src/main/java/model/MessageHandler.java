@@ -3,6 +3,7 @@ package model;
 import entity.Message;
 import entity.User;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,12 @@ public class MessageHandler {
         getConnectedToTutor();
     }
 
+    
+    public void sendFile(byte[] buf, Session s) {
+        findUser(s).setBuf(buf);
+    }
+
+    
     public void sendMessage(Message message) throws EncodeException, IOException {
         if (message.getCommand().equals("message") && message.getTo() != null) {
             for (User user : users) {
@@ -62,6 +69,14 @@ public class MessageHandler {
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
+        } else if (message.getCommand().equals("file") && message.getTo() != null) {
+                Message m = new Message();
+                m.setTo(message.getTo());
+                m.setFrom(message.getFrom());
+                m.setCommand("file");
+                m.setContent(message.getContent());
+                findUser(message.getTo()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFrom()).getBuf()));
+                findUser(message.getTo()).getSession().getBasicRemote().sendObject(m);
         } else if (message.getCommand().equals("take")) {
             User u = findUser(message.getContent().split(":")[0]);
             for (Message message1 : notGettingHelp.get(u)) {
@@ -91,7 +106,7 @@ public class MessageHandler {
             sendMessage(removeTutor(user.getUsername()));
             notGettingHelp.put(user, new ArrayList());
             Message m = new Message();
-            m.setContent(message.getFrom()+" couldn't resolve issue");
+            m.setContent(message.getFrom() + " couldn't resolve issue");
             notGettingHelp.get(user).add(m);
             System.out.println(notGettingHelp);
             getConnectedToTutor();
@@ -108,7 +123,7 @@ public class MessageHandler {
             }
         }
     }
-    
+
     public Message setTutor(Message message, User u) {
         Message m = new Message();
         m.setFrom("Server");
@@ -175,7 +190,7 @@ public class MessageHandler {
         return tutors.stream().anyMatch((tutor) -> (tutor.equals(username)));
     }
 
-    private User findUser(Session session) {
+    public User findUser(Session session) {
         for (User user : users) {
             if (user.getSession().equals(session)) {
                 return user;
@@ -195,7 +210,7 @@ public class MessageHandler {
         return updatedUser;
     }
 
-    private User findUser(String username) {
+    public User findUser(String username) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
                 return user;
@@ -203,7 +218,5 @@ public class MessageHandler {
         }
         return null;
     }
-    
-     
 
 }

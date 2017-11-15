@@ -15,12 +15,15 @@ class Chat extends Component {
         disconnected: false,
         to: null,
         command: 'message',
-        usersNeedHelp: []
+        usersNeedHelp: [],
+        file: [],
+        blobUrl: ''
     }
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
@@ -39,42 +42,58 @@ class Chat extends Component {
     }
 
     handleMessage = (e) => {
-        let res = JSON.parse(e.data);
-        let date = new Date();
-        if (res.command === 'needHelp') {
-            if (res && res.content) {
-                new Audio(beep).play();
+        console.log(e);
+        if (e.data.constructor === Blob) {
+            this.setState({blobUrl: URL.createObjectURL(e.data)})
+        } else {
+            let message = JSON.parse(e.data);
+            let date = new Date();
+            if (message.command === 'needHelp') {
+                if (message && message.content) {
+                    new Audio(beep).play();
+                    this.setState({
+                        usersNeedHelp: message.content.split(";")
+                    })
+                } else {
+                    this.setState({usersNeedHelp: []})
+                }
+            } else if (message.command === 'file') {
+                var link = document.createElement("a");
+                link.href = this.state.blobUrl;
+                link.download = message.content;
+                link.innerHTML = "Click here to download: " + message.content;
+                document.body.appendChild(link);
+                let chatMessages = this.state.textArea;
+                chatMessages += "\n"+message.from + " - " + date.getHours() + ":" + date.getMinutes() + "\n" + message.content + " link:\n" + this.state.blobUrl;
                 this.setState({
-                    usersNeedHelp: res.content.split(";")
+                    textArea: chatMessages
+                });
+            } else if (message.command === 'setTutor') {
+                new Audio(beep).play();
+                let chatMessages = this.state.textArea;
+                chatMessages += '\n' + message.content + ' connected - ' + date.getHours() + ":" + date.getMinutes();
+                this.setState({
+                    to: message.content,
+                    textArea: chatMessages
                 })
-            } else {
-                this.setState({usersNeedHelp: []})
+            } else if (message.command === 'connectedUsers') {
+                if (message.content.split(";")[0] === "") {
+                    new Audio(beep).play();
+                    this.setState({users: []})
+                } else {
+                    this.setState({users: message.content.split(";")})
+                }
             }
-        } else if (res.command === 'setTutor') {
-            new Audio(beep).play();
-            let chatMessages = this.state.textArea;
-            chatMessages += '\n' + res.content + ' connected - ' + date.getHours()+":"+date.getMinutes();
-            this.setState({
-                to: res.content,
-                textArea: chatMessages
-            })
-        } else if (res.command === 'connectedUsers') {
-            if (res.content.split(";")[0] === "") {
-                new Audio(beep).play();
-                this.setState({users: []})
-            } else {
-                this.setState({users: res.content.split(";")})
+            else {
+                if (message.from !== this.state.username) {
+                    new Audio(beep).play();
+                }
+                let chatMessages = this.state.textArea;
+                chatMessages += "\n" + message.from + " - " + date.getHours() + ":" + date.getMinutes() + "\n" + message.content;
+                this.setState({
+                    textArea: chatMessages
+                });
             }
-        }
-        else {
-            if (res.from !== this.state.username) {
-                new Audio(beep).play();
-            }
-            let chatMessages = this.state.textArea;
-            chatMessages += "\n" + res.from + " - " + date.getHours()+":"+date.getMinutes() + "\n" + res.content;
-            this.setState({
-                textArea: chatMessages
-            });
         }
     }
 
@@ -104,16 +123,32 @@ class Chat extends Component {
         }
     }
 
+    sendFile = () => {
+        var file = this.state.file[0];
+        let msg = JSON.stringify({
+            'to': this.state.to,
+            'from': this.state.username,
+            'command': 'file',
+            'content': file.name
+        })
+        this.state.connection.send(file);
+        this.state.connection.send(msg);
+    }
+
     sendMessage = () => {
+        console.log(this.state.file.length)
+        if (this.state.file.length > 0) {
+            this.sendFile();
+        }
         this.setState({
             message: '',
+            file: []
         })
         let msg = JSON.stringify({
             'to': this.state.to,
             'from': this.state.username,
             'command': this.state.command,
-            'content': this.state.message
-
+            'content': this.state.message,
         })
         this.state.connection.send((msg))
     }
@@ -156,6 +191,7 @@ class Chat extends Component {
         }
         return (
             <div>
+
                 <Navbar username={this.state.username}/>
                 <div className="container">
                     <br/>
@@ -201,6 +237,7 @@ class Chat extends Component {
                     <br/>
                     <input className="btn btn-warning" type="button" onClick={() => this.sendMessage('message')}
                            value='Send message'/>
+                    <input type="file" onChange={(e) => this.setState({file: e.target.files})}/>
                 </div>
             </div>
         );

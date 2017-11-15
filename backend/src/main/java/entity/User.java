@@ -13,6 +13,15 @@ public class User {
     private String username;
     private Boolean tutor;
     private String assignedTutor;
+    private byte[] buf;
+
+    public byte[] getBuf() {
+        return buf;
+    }
+
+    public void setBuf(byte[] buf) {
+        this.buf = buf;
+    }
 
     public String getAssignedTutor() {
         return assignedTutor;

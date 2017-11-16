@@ -1,29 +1,34 @@
 import React, {Component} from 'react';
+import {Redirect} from "react-router-dom";
 
 class App extends Component {
 
-    state = {isHovered: false};
+    state = {isHovered: false, redirect: false};
 
     handleHover = () => {
         this.setState({
             isHovered: !this.state.isHovered
-        }, console.log(this.state));
+        });
+    }
+
+    signOut = () => {
+        this.setState({redirect: true})
     }
 
     render() {
+        if (this.state.redirect) {
+            return (
+                <Redirect to={'/TutorChat/'}/>
+            )
+        }
+
         const iClass = this.state.isHovered ? "#e4e2e5" : "";
         if (this.props.username !== undefined) {
             return (
                 <nav className="navbar navbar-expand-lg navbar-light bg-light"
                      style={{backgroundColor: "#f8f9fa", boxShadow: "0px 25px 73px -26px rgba(13,10,212,1)"}}>
                     <div className="container">
-                        <a className="navbar-brand" href="#">TutorChat</a>
-                        <ul className="navbar-nav mr-auto">
-                            <li className="nav-item active">
-                                <a className="nav-link" href="#">Home <span className="sr-only">(current)</span></a>
-                            </li>
-                        </ul>
-
+                        <a className="navbar-brand" href="">TutorChat</a>
                         <div className="dropdown" onMouseEnter={this.handleHover} onMouseLeave={this.handleHover}
                              style={{backgroundColor: iClass}}>
                                 <span className="dropdown-toggle" id="dropdownMenu2" data-toggle="dropdown">
@@ -34,7 +39,7 @@ class App extends Component {
                                 <button className="dropdown-item" data-toggle="modal" data-target=".bd-example-modal-lg"
                                         type="button">Profile
                                 </button>
-                                <button className="dropdown-item" type="button">Sign out</button>
+                                <button onClick={this.signOut} className="dropdown-item" type="button">Sign out</button>
                             </div>
                         </div>
 
@@ -44,7 +49,19 @@ class App extends Component {
                          aria-labelledby="myLargeModalLabel" aria-hidden="true">
                         <div className="modal-dialog modal-lg">
                             <div className="modal-content">
-                                <h1>Hey {this.props.username}</h1>
+                                <div className="container">
+                                    <h1>Hey {this.props.username}!</h1>
+                                    <div className="row">
+                                        <div className="col-md-3">
+                                            <h4>Profile avatar: </h4>
+                                            <h4>Sound enabled:</h4>
+                                        </div>
+                                        <div className="col-md-9">
+                                            <h4>/image/path/</h4>
+                                            <input type="checkbox" defaultChecked={true}/>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -56,7 +73,7 @@ class App extends Component {
             <nav className="navbar navbar-light"
                  style={{backgroundColor: "#f8f9fa", boxShadow: "0px 25px 73px -26px rgba(13,10,212,1)"}}>
                 <div className="container">
-                    <a className="navbar-brand" href="#">TutorChat</a>
+                    <a className="navbar-brand" href="">TutorChat</a>
                 </div>
             </nav>
         )

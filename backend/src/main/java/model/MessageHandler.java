@@ -77,6 +77,9 @@ public class MessageHandler {
                 m.setContent(message.getContent());
                 findUser(message.getTo()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFrom()).getBuf()));
                 findUser(message.getTo()).getSession().getBasicRemote().sendObject(m);
+                findUser(message.getFrom()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFrom()).getBuf()));
+                m.setTo(message.getFrom());
+                findUser(message.getFrom()).getSession().getBasicRemote().sendObject(m);
         } else if (message.getCommand().equals("take")) {
             User u = findUser(message.getContent().split(":")[0]);
             for (Message message1 : notGettingHelp.get(u)) {

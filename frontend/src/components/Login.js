@@ -14,14 +14,12 @@ class Login extends Component {
         })
     }
 
-
     render() {
-
         return (
             <div>
                 <Navbar/>
                 <br/>
-                <h2 className="text-center">Welcome to TutorChat, please login!</h2>
+                <h2 className="text-center">Welcome to TutorChat</h2>
                 <div className="row">
                     <div className="col"></div>
                     <div className="col">
@@ -29,20 +27,20 @@ class Login extends Component {
                         <input className="form-control" onChange={this.handleInput} type="text"
                                placeholder="Username" name="username"/>
                         <br/>
-                        <Link className="btn btn-warning" value="Connect" username={this.state.username}
+                        <Link className="btn btn-secondary" value="Connect" username={this.state.username}
                               to={{
                                   pathname: "/TutorChat/chat",
                                   username: this.state.username,
                               }}>Connect</Link>
-                        <Link style={{margin: "10px"}} className="btn btn-warning" value="Create user "
-                              username={this.state.username}
-                              to={{
-                                  pathname: "/TutorChat/chat",
-                                  username: this.state.username,
-                              }}>Create user</Link>
+                        {/*<Link style={{margin: "10px"}} className="btn btn-warning" value="Create user "*/}
+                              {/*username={this.state.username}*/}
+                              {/*to={{*/}
+                                  {/*pathname: "/TutorChat/chat",*/}
+                                  {/*username: this.state.username,*/}
+                              {/*}}>Create user</Link>*/}
                         <br/>
                         <hr/>
-                        <h4>Tutors online:0</h4>
+                        {/*<h4>Tutors online:0</h4>*/}
 
                     </div>
                     <div className="col"></div>

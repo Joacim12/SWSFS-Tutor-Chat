@@ -1,27 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=VT323');
+@import url('https://fonts.googleapis.com/css?family=Nunito:600');
 
 body {
     margin: 0;
     padding: 0;
-    font-family: 'VT323', monospace !important;
+    font-family: 'Nunito', sans-serif;
 }
-
-input{
-    font-family: 'VT323', monospace !important;
-}
-
-textarea{
-    font-family: 'VT323', monospace !important;
-}
-
-::-webkit-input-placeholder {
-    font-family: 'VT323', monospace !important;
-}
-
-::-moz-placeholder {
-    font-family: 'VT323', monospace !important;
-}
-
-:-ms-input-placeholder {
-    font-family: 'VT323', monospace !important;
- }

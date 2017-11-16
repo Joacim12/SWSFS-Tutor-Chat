@@ -1,6 +1,5 @@
 package entity;
 
-
 /**
  * Created by jvetterlain
  */

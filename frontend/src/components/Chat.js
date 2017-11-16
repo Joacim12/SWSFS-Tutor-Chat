@@ -3,27 +3,23 @@ import {Redirect} from 'react-router-dom'
 import UserList from "./UserList";
 import Navbar from "./Navbar";
 import beep from "./beep.wav"
+import ChatArea from "./ChatArea";
+import ToolBar from "./ToolBar";
 
 class Chat extends Component {
 
     state = {
-        connection: null,
-        users: [],
-        textArea: '',
-        username: this.props.location.username,
-        message: '',
-        disconnected: false,
-        to: null,
-        command: 'message',
-        usersNeedHelp: [],
-        file: [],
-        blobUrl: ''
+        connection: null, users: [], textArea: '',
+        username: this.props.location.username, message: '',
+        disconnected: false, to: null,
+        command: 'message', usersNeedHelp: [],
+        file: [], blobUrl: '', messages: []
     }
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
-            // let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
@@ -36,40 +32,28 @@ class Chat extends Component {
             this.setState({
                 disconnected: true
             })
-        } else {
-            this.scroll();
         }
     }
 
     handleMessage = (e) => {
-        console.log(e);
         if (e.data.constructor === Blob) {
             this.setState({blobUrl: URL.createObjectURL(e.data)})
         } else {
             let message = JSON.parse(e.data);
+            console.log(message)
             let date = new Date();
             if (message.command === 'needHelp') {
                 if (message && message.content) {
-                    new Audio(beep).play();
-                    this.setState({
-                        usersNeedHelp: message.content.split(";")
-                    })
+                    this.setState({usersNeedHelp: message.content.split(";")})
                 } else {
                     this.setState({usersNeedHelp: []})
                 }
             } else if (message.command === 'file') {
-                var link = document.createElement("a");
-                link.href = this.state.blobUrl;
-                link.download = message.content;
-                link.innerHTML = "Click here to download: " + message.content;
-                document.body.appendChild(link);
-                let chatMessages = this.state.textArea;
-                chatMessages += "\n"+message.from + " - " + date.getHours() + ":" + date.getMinutes() + "\n" + message.content + " link:\n" + this.state.blobUrl;
-                this.setState({
-                    textArea: chatMessages
-                });
+                new Audio(beep).play()
+                message.content += ";" + this.state.blobUrl;
+                message.time = " " + new Date().toLocaleTimeString('en-GB');
+                this.setState(prevState => ({messages: [...prevState.messages, message]}));
             } else if (message.command === 'setTutor') {
-                new Audio(beep).play();
                 let chatMessages = this.state.textArea;
                 chatMessages += '\n' + message.content + ' connected - ' + date.getHours() + ":" + date.getMinutes();
                 this.setState({
@@ -78,21 +62,15 @@ class Chat extends Component {
                 })
             } else if (message.command === 'connectedUsers') {
                 if (message.content.split(";")[0] === "") {
-                    new Audio(beep).play();
                     this.setState({users: []})
                 } else {
                     this.setState({users: message.content.split(";")})
                 }
             }
             else {
-                if (message.from !== this.state.username) {
-                    new Audio(beep).play();
-                }
-                let chatMessages = this.state.textArea;
-                chatMessages += "\n" + message.from + " - " + date.getHours() + ":" + date.getMinutes() + "\n" + message.content;
-                this.setState({
-                    textArea: chatMessages
-                });
+                new Audio(beep).play()
+                message.time = " " + new Date().toLocaleTimeString('en-GB');
+                this.setState(prevState => ({messages: [...prevState.messages, message]}));
             }
         }
     }
@@ -136,7 +114,6 @@ class Chat extends Component {
     }
 
     sendMessage = () => {
-        console.log(this.state.file.length)
         if (this.state.file.length > 0) {
             this.sendFile();
         }
@@ -150,7 +127,9 @@ class Chat extends Component {
             'command': this.state.command,
             'content': this.state.message,
         })
-        this.state.connection.send((msg))
+        if (this.state.message.length >= 1) {
+            this.state.connection.send((msg))
+        }
     }
 
     handleChange = (e) => {
@@ -159,14 +138,10 @@ class Chat extends Component {
         })
     }
 
-    scroll = () => {
-        let textArea = document.getElementById('chat');
-        textArea.scrollTop = textArea.scrollHeight;
-    }
 
     handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            this.sendMessage('message');
+            this.sendMessage();
         }
     }
 
@@ -180,6 +155,14 @@ class Chat extends Component {
         })
         this.setState({to: ''})
         this.state.connection.send(msg);
+    }
+
+    setFile=(e)=>{
+        this.setState({file:e.target.files});
+    }
+
+    addSmiley=(e)=>{
+        this.setState((prevState)=>({message:prevState.message + e}))
     }
 
 
@@ -197,19 +180,7 @@ class Chat extends Component {
                     <br/>
                     <div className="row">
                         <div className="col-9">
-                        <textarea className="form-control"
-                                  id="chat"
-                                  onChange={this.scroll}
-                                  value={this.state.textArea}
-                                  style={{
-                                      cursor: 'text',
-                                      backgroundColor: "#f8f9fa",
-                                      boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
-                                  }}
-                                  disabled
-                                  cols="100" rows="15"
-                                  placeholder="Type something!"
-                        />
+                            <ChatArea chat={this.state.messages}/>
                             <br/>
                         </div>
                         <div className="col-3">
@@ -221,6 +192,7 @@ class Chat extends Component {
                     </div>
                     <div className="row">
                         <div className="col-9">
+                            <ToolBar file={this.setFile} smiley={this.addSmiley}/>
                             <textarea className="form-control"
                                       placeholder="Write a message ..."
                                       id="message"
@@ -229,15 +201,15 @@ class Chat extends Component {
                                       value={this.state.message}
                                       style={{
                                           backgroundColor: "#f8f9fa",
-                                          boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
+                                          boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)",
+                                          overflowX:"hidden"
                                       }}
                                       onChange={this.handleChange}/>
                         </div>
                     </div>
                     <br/>
-                    <input className="btn btn-warning" type="button" onClick={() => this.sendMessage('message')}
+                    <input className="btn btn-secondary" type="button" onClick={() => this.sendMessage()}
                            value='Send message'/>
-                    <input type="file" onChange={(e) => this.setState({file: e.target.files})}/>
                 </div>
             </div>
         );

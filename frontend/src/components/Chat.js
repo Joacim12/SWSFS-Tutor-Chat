@@ -11,15 +11,15 @@ class Chat extends Component {
     state = {
         connection: null, users: [], textArea: '',
         username: this.props.location.username, message: '',
-        disconnected: false, to: null,
+        disconnected: false, toProfile: null,
         command: 'message', usersNeedHelp: [],
         file: [], blobUrl: '', messages: []
     }
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
-            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })
@@ -57,7 +57,7 @@ class Chat extends Component {
                 let chatMessages = this.state.textArea;
                 chatMessages += '\n' + message.content + ' connected - ' + date.getHours() + ":" + date.getMinutes();
                 this.setState({
-                    to: message.content,
+                    toProfile: message.content,
                     textArea: chatMessages
                 })
             } else if (message.command === 'connectedUsers') {
@@ -76,12 +76,12 @@ class Chat extends Component {
     }
 
     handleList = (e) => {
-        this.setState({to: e.target.id.split(":")[0]})
+        this.setState({toProfile: e.target.id.split(":")[0]})
     }
 
     takeUser = (user) => {
         let msg = JSON.stringify({
-            'from': this.state.username,
+            'fromProfile': this.state.username,
             'command': "take",
             'content': user.target.id
         })
@@ -104,8 +104,8 @@ class Chat extends Component {
     sendFile = () => {
         var file = this.state.file[0];
         let msg = JSON.stringify({
-            'to': this.state.to,
-            'from': this.state.username,
+            "toProfile": this.state.toProfile,
+            'fromProfile': this.state.username,
             'command': 'file',
             'content': file.name
         })
@@ -122,8 +122,8 @@ class Chat extends Component {
             file: []
         })
         let msg = JSON.stringify({
-            'to': this.state.to,
-            'from': this.state.username,
+            "toProfile": this.state.toProfile,
+            'fromProfile': this.state.username,
             'command': this.state.command,
             'content': this.state.message,
         })
@@ -147,13 +147,13 @@ class Chat extends Component {
 
     handleDc = (e) => {
         let msg = JSON.stringify({
-            'to': 'server',
-            'from': this.state.username,
+            "toProfile": 'server',
+            'fromProfile': this.state.username,
             'command': 'release',
             'content': e.target.id
 
         })
-        this.setState({to: ''})
+        this.setState({toProfile: ''})
         this.state.connection.send(msg);
     }
 

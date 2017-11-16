@@ -1,11 +1,11 @@
 package decoder;
 
 import com.google.gson.Gson;
+import entitydb.Message;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;
-import entity.Message;
 
 /**
  * Created by jvetterlain
@@ -19,6 +19,7 @@ public class MessageEncoder implements Encoder.Text<Message> {
 
     @Override
     public void init(EndpointConfig endpointConfig) {
+//        System.out.println("init encoder");
         // do nothing
     }
 

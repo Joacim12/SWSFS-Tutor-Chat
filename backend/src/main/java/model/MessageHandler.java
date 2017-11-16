@@ -1,7 +1,9 @@
 package model;
 
-import entity.Message;
 import entity.User;
+import entitydb.Message;
+import entitydb.Profile;
+import facade.UserFacade;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,14 +26,16 @@ public class MessageHandler {
     private static List<User> users = new CopyOnWriteArrayList();
     private static List<String> tutors = new CopyOnWriteArrayList();
     private static Map<User, List<Message>> notGettingHelp = new ConcurrentHashMap();
+    private UserFacade uf;
 
     public MessageHandler() {
+        uf = new UserFacade("PU");
         //lets fetch this from db in the future
         tutors.add("t");
         tutors.add("t1");
     }
 
-    public void addUser(Session session, String username) throws EncodeException, IOException {
+    public void addUser(Session session, String username, Profile dbUser) throws EncodeException, IOException {
         User user = new User();
         user.setSession(session);
         user.setUsername(username);
@@ -40,6 +44,11 @@ public class MessageHandler {
             user.setTutor(Boolean.TRUE);
         }
         users.add(user);
+
+        for (Message message : dbUser.getMessages()) {
+            user.getSession().getBasicRemote().sendObject(message);
+        }
+
         users.stream().filter((user1) -> (user1.isTutor())).forEach((a) -> {
             try {
                 sendMessage(getNeedHelp());
@@ -56,39 +65,40 @@ public class MessageHandler {
         getConnectedToTutor();
     }
 
-    
     public void sendFile(byte[] buf, Session s) {
         findUser(s).setBuf(buf);
     }
 
-    
     public void sendMessage(Message message) throws EncodeException, IOException {
-        if (message.getCommand().equals("message") && message.getTo() != null) {
+        if (message.getCommand().equals("message") && message.getToProfile() != null) {
             for (User user : users) {
-                if (user.getUsername().equals(message.getTo()) || user.getUsername().equals(message.getFrom())) {
+                if (user.getUsername().equals(message.getToProfile()) || user.getUsername().equals(message.getFromProfile())) {
+                    Profile p = uf.getProfileById(user.getUsername());
+                    p.getMessages().add(message);
+                    uf.updateProfile(p);
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
-        } else if (message.getCommand().equals("file") && message.getTo() != null) {
-                Message m = new Message();
-                m.setTo(message.getTo());
-                m.setFrom(message.getFrom());
-                m.setCommand("file");
-                m.setContent(message.getContent());
-                findUser(message.getTo()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFrom()).getBuf()));
-                findUser(message.getTo()).getSession().getBasicRemote().sendObject(m);
-                findUser(message.getFrom()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFrom()).getBuf()));
-                m.setTo(message.getFrom());
-                findUser(message.getFrom()).getSession().getBasicRemote().sendObject(m);
+        } else if (message.getCommand().equals("file") && message.getToProfile() != null) {
+            Message m = new Message();
+            m.setToProfile(message.getToProfile());
+            m.setFromProfile(message.getFromProfile());
+            m.setCommand("file");
+            m.setContent(message.getContent());
+            findUser(message.getToProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFromProfile()).getBuf()));
+            findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(m);
+            findUser(message.getFromProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFromProfile()).getBuf()));
+            m.setToProfile(message.getFromProfile());
+            findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
         } else if (message.getCommand().equals("take")) {
             User u = findUser(message.getContent().split(":")[0]);
             for (Message message1 : notGettingHelp.get(u)) {
-                findUser(message.getFrom()).getSession().getBasicRemote().sendObject(message1);
+                findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
             }
             notGettingHelp.remove(u);
             users.forEach(user -> {
                 if (user.getUsername().equals(u.getUsername())) {
-                    user.setAssignedTutor(message.getFrom());
+                    user.setAssignedTutor(message.getFromProfile());
                 }
             });
             sendMessage(getNeedHelp());
@@ -96,12 +106,12 @@ public class MessageHandler {
             sendMessage(setTutor(message, u));
         } else if (message.getCommand().equals(("setTutor"))) {
             for (User user : users) {
-                if (user.getUsername().equals(message.getTo())) {
+                if (user.getUsername().equals(message.getToProfile())) {
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
         } else if (message.getCommand().equals("connectedUsers")) {
-            findUser(message.getTo()).getSession().getBasicRemote().sendObject(message);
+            findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
         } else if (message.getCommand().equals("release")) {
             User user = findUser(message.getContent());
             user.setAssignedTutor("");
@@ -109,16 +119,16 @@ public class MessageHandler {
             sendMessage(removeTutor(user.getUsername()));
             notGettingHelp.put(user, new ArrayList());
             Message m = new Message();
-            m.setContent(message.getFrom() + " couldn't resolve issue");
+            m.setContent(message.getFromProfile() + " couldn't resolve issue");
             notGettingHelp.get(user).add(m);
             System.out.println(notGettingHelp);
             getConnectedToTutor();
             sendMessage(getNeedHelp());
-        } else if (message.getTo() == null && (!getIsTutor(message.getFrom())) && message.getFrom() != null) {
-            if (findUser(message.getFrom()) != null) {
-                notGettingHelp.putIfAbsent(findUser(message.getFrom()), new ArrayList());
-                notGettingHelp.get(findUser(message.getFrom())).add(message);
-                message.setTo(message.getFrom());
+        } else if (message.getToProfile() == null && (!getIsTutor(message.getFromProfile())) && message.getFromProfile() != null) {
+            if (findUser(message.getFromProfile()) != null) {
+                notGettingHelp.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
+                notGettingHelp.get(findUser(message.getFromProfile())).add(message);
+                message.setToProfile(message.getFromProfile());
                 sendMessage(message);
             }
             for (User tutor : getTutors()) {
@@ -127,28 +137,28 @@ public class MessageHandler {
         }
     }
 
-    public Message setTutor(Message message, User u) {
+    private Message setTutor(Message message, User u) {
         Message m = new Message();
-        m.setFrom("Server");
+        m.setFromProfile("Server");
         m.setCommand("setTutor");
-        m.setContent(message.getFrom());
-        m.setTo(u.getUsername());
+        m.setContent(message.getFromProfile());
+        m.setToProfile(u.getUsername());
         return m;
     }
 
-    public Message removeTutor(String username) {
+    private Message removeTutor(String username) {
         Message m = new Message();
-        m.setFrom("Server");
+        m.setFromProfile("Server");
         m.setCommand("setTutor");
         m.setContent("");
-        m.setTo(username);
+        m.setToProfile(username);
         return m;
     }
 
-    public Message getNeedHelp() {
+    private Message getNeedHelp() {
         Message m = new Message();
         m.setCommand("needHelp");
-        m.setFrom("Server");
+        m.setFromProfile("Server");
         StringJoiner sj = new StringJoiner(";");
         notGettingHelp.forEach((user, messages) -> {
             System.out.println(user + " " + messages);
@@ -163,11 +173,11 @@ public class MessageHandler {
     private void getConnectedToTutor() throws EncodeException, IOException {
         Message m = new Message();
         m.setCommand("connectedUsers");
-        m.setFrom("Server");
+        m.setFromProfile("Server");
         for (User tutor : users) {
             if (tutor.isTutor()) {
                 StringJoiner sj = new StringJoiner(";");
-                m.setTo(tutor.getUsername());
+                m.setToProfile(tutor.getUsername());
                 users.forEach(user -> {
                     if (user.getAssignedTutor() != null) {
                         if (user.getAssignedTutor().equals(tutor.getUsername())) {
@@ -178,7 +188,7 @@ public class MessageHandler {
                 m.setContent(sj.toString());
                 sendMessage(m);
             }
-        };
+        }
     }
 
     private List<User> getTutors() {
@@ -213,13 +223,17 @@ public class MessageHandler {
         return updatedUser;
     }
 
-    public User findUser(String username) {
+    private User findUser(String username) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
                 return user;
             }
         }
         return null;
+    }
+    
+    public UserFacade getUserFacade(){
+        return uf;
     }
 
 }

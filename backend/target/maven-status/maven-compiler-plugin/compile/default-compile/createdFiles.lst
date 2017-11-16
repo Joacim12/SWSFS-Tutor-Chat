@@ -1,6 +1,11 @@
 entity\User.class
-decoder\MessageDecoder.class
-entity\Message.class
+entitydb\Profile.class
 model\MessageHandler.class
 model\ChatControl.class
+entitydb\Profile_.class
+decoder\MessageDecoder.class
+entitydb\Message.class
+entitydb\Message_.class
+facade\UserFacade.class
+entity\Message.class
 decoder\MessageEncoder.class

@@ -59,7 +59,5 @@ public class User {
     public String toString() {
         return "User{" + "session=" + session + ", username=" + username + ", tutor=" + tutor + ", assignedTutor=" + assignedTutor + '}';
     }
-
-    
     
 }

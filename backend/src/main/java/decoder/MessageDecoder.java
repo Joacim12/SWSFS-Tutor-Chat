@@ -1,11 +1,11 @@
 package decoder;
 
 import com.google.gson.Gson;
+import entitydb.Message;
 
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
-import entity.Message;
 
 /**
  * Created jvetterlain

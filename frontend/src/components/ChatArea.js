@@ -13,7 +13,7 @@ class ChatArea extends Component {
                         </div>
                         <div className="col-11">
                             <p style={{margin: "0px"}}>
-                                <span style={{color: "#62baf0"}}>{message.from}</span>
+                                <span style={{color: "#62baf0"}}>{message.fromProfile}</span>
                                 <span style={{color: "#dcdbde"}}>{message.time}</span>
                             </p>
                             {message.command === 'file' ?

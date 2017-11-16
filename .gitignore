@@ -98,5 +98,9 @@ nbdist/
 !.vscode/extensions.json
 .history
 
+### WebStorm ###
+
+.idea/
+
 # META-INF
 META-INF

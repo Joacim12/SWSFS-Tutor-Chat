@@ -12,7 +12,7 @@ class Chat extends Component {
         connection: null, users: [], textArea: '',
         username: this.props.location.username, message: '',
         disconnected: false, toProfile: null,
-        command: 'message', usersNeedHelp: [],
+        command: 'needHelp', usersNeedHelp: [],
         file: [], blobUrl: '', messages: []
     }
 
@@ -40,7 +40,6 @@ class Chat extends Component {
             this.setState({blobUrl: URL.createObjectURL(e.data)})
         } else {
             let message = JSON.parse(e.data);
-            console.log(message)
             let date = new Date();
             if (message.command === 'needHelp') {
                 if (message && message.content) {
@@ -58,7 +57,8 @@ class Chat extends Component {
                 chatMessages += '\n' + message.content + ' connected - ' + date.getHours() + ":" + date.getMinutes();
                 this.setState({
                     toProfile: message.content,
-                    textArea: chatMessages
+                    textArea: chatMessages,
+                    command:'message'
                 })
             } else if (message.command === 'connectedUsers') {
                 if (message.content.split(";")[0] === "") {
@@ -80,6 +80,7 @@ class Chat extends Component {
     }
 
     takeUser = (user) => {
+        this.setState({command:"message"})
         let msg = JSON.stringify({
             'fromProfile': this.state.username,
             'command': "take",
@@ -174,7 +175,6 @@ class Chat extends Component {
         }
         return (
             <div>
-
                 <Navbar username={this.state.username}/>
                 <div className="container">
                     <br/>

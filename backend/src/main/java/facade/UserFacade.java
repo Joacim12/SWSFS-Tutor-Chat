@@ -1,7 +1,7 @@
 package facade;
 
-import entitydb.Message;
-import entitydb.Profile;
+import entity.Message;
+import entity.Profile;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -27,24 +27,16 @@ public class UserFacade {
     }
 
     public void tester() {
-        Profile u = new Profile();
-        u.setMessages(new ArrayList());
-//        Message m = new Message();
-//        m.setCommand("message");
-//        m.setContent("Hey");
-//        m.setFromProfile("t");
-//        m.setToProfile("Joacim");
-//        u.getMessages().add(m);
-        u.setRank("tutor");
-        u.setUsername("t");
-        createProfile(u);
-//        User u = getUserById("Joacim");
-//        u.setMessages(new ArrayList());
-//        u.getMessages().add(m);
-//        updateUser(u);
-//          updateUser(getUserById("joacim"));
-//        System.out.println(getUserById("Joacim").getMessages());
-
+        Profile p = new Profile();
+        p.setMessages(new ArrayList());
+        p.setUsername("t");
+        p.setTutor(Boolean.TRUE);
+        createProfile(p);
+        p = new Profile();
+        p.setMessages(new ArrayList());
+        p.setUsername("j");
+        p.setTutor(Boolean.FALSE);
+        createProfile(p);
     }
 
     private EntityManager getEntityManager() {

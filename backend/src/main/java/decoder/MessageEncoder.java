@@ -1,7 +1,7 @@
 package decoder;
 
 import com.google.gson.Gson;
-import entitydb.Message;
+import entity.Message;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;

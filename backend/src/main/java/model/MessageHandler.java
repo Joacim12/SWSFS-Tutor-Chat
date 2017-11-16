@@ -1,8 +1,7 @@
 package model;
 
-import entity.User;
-import entitydb.Message;
-import entitydb.Profile;
+import entity.Message;
+import entity.Profile;
 import facade.UserFacade;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,8 +11,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
@@ -23,44 +20,22 @@ import javax.websocket.Session;
  */
 public class MessageHandler {
 
-    private static List<User> users = new CopyOnWriteArrayList();
-    private static List<String> tutors = new CopyOnWriteArrayList();
-    private static Map<User, List<Message>> notGettingHelp = new ConcurrentHashMap();
-    private UserFacade uf;
+    private static final List<Profile> ONLINEPROFILES = new CopyOnWriteArrayList();
+    private static final Map<Profile, List<Message>> NOTGETTINGHELP = new ConcurrentHashMap();
+    private final UserFacade USERFACADE = new UserFacade("PU");;
 
-    public MessageHandler() {
-        uf = new UserFacade("PU");
-        //lets fetch this from db in the future
-        tutors.add("t");
-        tutors.add("t1");
-    }
-
-    public void addUser(Session session, String username, Profile dbUser) throws EncodeException, IOException {
-        User user = new User();
-        user.setSession(session);
-        user.setUsername(username);
-        user.setTutor(Boolean.FALSE);
-        if (getIsTutor(username)) {
-            user.setTutor(Boolean.TRUE);
-        }
-        users.add(user);
-
+    public void addUser(Session session,Profile dbUser) throws EncodeException, IOException {
+        dbUser.setSession(session);
+        ONLINEPROFILES.add(dbUser);
         for (Message message : dbUser.getMessages()) {
-            user.getSession().getBasicRemote().sendObject(message);
+            dbUser.getSession().getBasicRemote().sendObject(message);
         }
-
-        users.stream().filter((user1) -> (user1.isTutor())).forEach((a) -> {
-            try {
-                sendMessage(getNeedHelp());
-            } catch (EncodeException | IOException ex) {
-                Logger.getLogger(MessageHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
+        sendMessage(getNeedHelp());
     }
 
     public void disconnectHandler(Session session) throws EncodeException, IOException {
-        notGettingHelp.remove(findUser(session));
-        users.remove(findUser(session));
+        NOTGETTINGHELP.remove(findUser(session));
+        ONLINEPROFILES.remove(findUser(session));
         sendMessage(getNeedHelp());
         getConnectedToTutor();
     }
@@ -71,11 +46,11 @@ public class MessageHandler {
 
     public void sendMessage(Message message) throws EncodeException, IOException {
         if (message.getCommand().equals("message") && message.getToProfile() != null) {
-            for (User user : users) {
+            for (Profile user : ONLINEPROFILES) {
                 if (user.getUsername().equals(message.getToProfile()) || user.getUsername().equals(message.getFromProfile())) {
-                    Profile p = uf.getProfileById(user.getUsername());
+                    Profile p = USERFACADE.getProfileById(user.getUsername());
                     p.getMessages().add(message);
-                    uf.updateProfile(p);
+                    USERFACADE.updateProfile(p);
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
@@ -91,12 +66,12 @@ public class MessageHandler {
             m.setToProfile(message.getFromProfile());
             findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
         } else if (message.getCommand().equals("take")) {
-            User u = findUser(message.getContent().split(":")[0]);
-            for (Message message1 : notGettingHelp.get(u)) {
+            Profile u = findUser(message.getContent().split(":")[0]);
+            for (Message message1 : NOTGETTINGHELP.get(u)) {
                 findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
             }
-            notGettingHelp.remove(u);
-            users.forEach(user -> {
+            NOTGETTINGHELP.remove(u);
+            ONLINEPROFILES.forEach(user -> {
                 if (user.getUsername().equals(u.getUsername())) {
                     user.setAssignedTutor(message.getFromProfile());
                 }
@@ -105,7 +80,7 @@ public class MessageHandler {
             getConnectedToTutor();
             sendMessage(setTutor(message, u));
         } else if (message.getCommand().equals(("setTutor"))) {
-            for (User user : users) {
+            for (Profile user : ONLINEPROFILES) {
                 if (user.getUsername().equals(message.getToProfile())) {
                     user.getSession().getBasicRemote().sendObject(message);
                 }
@@ -113,31 +88,31 @@ public class MessageHandler {
         } else if (message.getCommand().equals("connectedUsers")) {
             findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
         } else if (message.getCommand().equals("release")) {
-            User user = findUser(message.getContent());
+            Profile user = findUser(message.getContent());
             user.setAssignedTutor("");
             updateUser(user);
             sendMessage(removeTutor(user.getUsername()));
-            notGettingHelp.put(user, new ArrayList());
+            NOTGETTINGHELP.put(user, new ArrayList());
             Message m = new Message();
             m.setContent(message.getFromProfile() + " couldn't resolve issue");
-            notGettingHelp.get(user).add(m);
-            System.out.println(notGettingHelp);
+            NOTGETTINGHELP.get(user).add(m);
             getConnectedToTutor();
             sendMessage(getNeedHelp());
-        } else if (message.getToProfile() == null && (!getIsTutor(message.getFromProfile())) && message.getFromProfile() != null) {
-            if (findUser(message.getFromProfile()) != null) {
-                notGettingHelp.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
-                notGettingHelp.get(findUser(message.getFromProfile())).add(message);
+        } else if (message.getCommand().equals("needHelp")) {
+            if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).getTutor()) {
+                NOTGETTINGHELP.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
+                NOTGETTINGHELP.get(findUser(message.getFromProfile())).add(message);
                 message.setToProfile(message.getFromProfile());
+                message.setCommand("message");
                 sendMessage(message);
             }
-            for (User tutor : getTutors()) {
+            for (Profile tutor : getTutors()) {
                 tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
             }
         }
     }
 
-    private Message setTutor(Message message, User u) {
+    private Message setTutor(Message message, Profile u) {
         Message m = new Message();
         m.setFromProfile("Server");
         m.setCommand("setTutor");
@@ -160,8 +135,7 @@ public class MessageHandler {
         m.setCommand("needHelp");
         m.setFromProfile("Server");
         StringJoiner sj = new StringJoiner(";");
-        notGettingHelp.forEach((user, messages) -> {
-            System.out.println(user + " " + messages);
+        NOTGETTINGHELP.forEach((user, messages) -> {
             sj.add(user.getUsername() + ":" + messages.get(0).getContent());
         });
         if (sj.toString().length() > 1) {
@@ -174,11 +148,11 @@ public class MessageHandler {
         Message m = new Message();
         m.setCommand("connectedUsers");
         m.setFromProfile("Server");
-        for (User tutor : users) {
-            if (tutor.isTutor()) {
+        for (Profile tutor : ONLINEPROFILES) {
+            if (tutor.getTutor()) {
                 StringJoiner sj = new StringJoiner(";");
                 m.setToProfile(tutor.getUsername());
-                users.forEach(user -> {
+                ONLINEPROFILES.forEach(user -> {
                     if (user.getAssignedTutor() != null) {
                         if (user.getAssignedTutor().equals(tutor.getUsername())) {
                             sj.add(user.getUsername());
@@ -191,30 +165,17 @@ public class MessageHandler {
         }
     }
 
-    private List<User> getTutors() {
-        List<User> tutore = new ArrayList();
-        users.stream().filter((user) -> (user.isTutor())).forEachOrdered((user) -> {
+    private List<Profile> getTutors() {
+        List<Profile> tutore = new ArrayList();
+        ONLINEPROFILES.stream().filter((user) -> (user.getTutor())).forEachOrdered((user) -> {
             tutore.add(user);
         });
         return tutore;
     }
 
-    private Boolean getIsTutor(String username) {
-        return tutors.stream().anyMatch((tutor) -> (tutor.equals(username)));
-    }
-
-    public User findUser(Session session) {
-        for (User user : users) {
-            if (user.getSession().equals(session)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private User updateUser(User user) {
-        User updatedUser = null;
-        for (User user1 : users) {
+    private Profile updateUser(Profile user) {
+        Profile updatedUser = null;
+        for (Profile user1 : ONLINEPROFILES) {
             if (user1.getUsername().equals(user.getUsername())) {
                 user1 = user;
             }
@@ -223,17 +184,28 @@ public class MessageHandler {
         return updatedUser;
     }
 
-    private User findUser(String username) {
-        for (User user : users) {
-            if (user.getUsername().equals(username)) {
+    private Profile findUser(String username) {
+        if (!username.equals("Server")) {
+            for (Profile user : ONLINEPROFILES) {
+                if (user.getUsername().equals(username)) {
+                    return user;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Profile findUser(Session session) {
+        for (Profile user : ONLINEPROFILES) {
+            if (user.getSession().equals(session)) {
                 return user;
             }
         }
         return null;
     }
-    
-    public UserFacade getUserFacade(){
-        return uf;
+
+    public UserFacade getUserFacade() {
+        return USERFACADE;
     }
 
 }

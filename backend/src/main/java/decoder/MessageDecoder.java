@@ -1,7 +1,7 @@
 package decoder;
 
 import com.google.gson.Gson;
-import entitydb.Message;
+import entity.Message;
 
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
@@ -14,6 +14,8 @@ public class MessageDecoder implements Decoder.Text<Message> {
 
     @Override
     public Message decode(String jsonMessage) throws DecodeException {
+        System.setProperty("file.encoding","UTF-8");
+        System.out.println(jsonMessage);
         return new Gson().fromJson(jsonMessage, Message.class);
     }
 

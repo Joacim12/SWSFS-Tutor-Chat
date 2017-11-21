@@ -18,8 +18,8 @@ class Chat extends Component {
 
     componentDidMount = () => {
         if (this.state.username !== undefined) {
-            let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
-            // let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
             this.setState({
                 connection: connection
             })

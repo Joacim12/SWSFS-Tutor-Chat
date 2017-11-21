@@ -22,18 +22,30 @@ public class MessageHandler {
 
     private static final List<Profile> ONLINEPROFILES = new CopyOnWriteArrayList();
     private static final Map<Profile, List<Message>> NOTGETTINGHELP = new ConcurrentHashMap();
-    private final UserFacade USERFACADE = new UserFacade("PU");;
+    private final UserFacade USERFACADE = new UserFacade("PU");
 
-    public void addUser(Session session,Profile dbUser) throws EncodeException, IOException {
+    ;
+
+    public void addUser(Session session, Profile dbUser) throws EncodeException, IOException {
         dbUser.setSession(session);
         ONLINEPROFILES.add(dbUser);
         for (Message message : dbUser.getMessages()) {
             dbUser.getSession().getBasicRemote().sendObject(message);
         }
         sendMessage(getNeedHelp());
+        for (Profile profile : ONLINEPROFILES) {
+            System.out.println(profile);
+        }
     }
 
     public void disconnectHandler(Session session) throws EncodeException, IOException {
+        for (Profile profile : ONLINEPROFILES) {
+            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(findUser(session).getUsername())) {
+                profile.setAssignedTutor(null);
+                NOTGETTINGHELP.put(profile, profile.getMessages());
+                profile.getSession().getBasicRemote().sendObject(removeTutor(profile.getUsername()));
+            }
+        }
         NOTGETTINGHELP.remove(findUser(session));
         ONLINEPROFILES.remove(findUser(session));
         sendMessage(getNeedHelp());

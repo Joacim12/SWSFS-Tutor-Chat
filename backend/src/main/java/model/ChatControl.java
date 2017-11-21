@@ -58,8 +58,8 @@ public class ChatControl {
 
     @OnError
     public void onError(Session session, Throwable throwable) throws EncodeException, IOException {
-        System.out.println(throwable);
-//        throwable.printStackTrace();
+//        System.out.println(throwable);
+        throwable.printStackTrace();
     }
     
 }

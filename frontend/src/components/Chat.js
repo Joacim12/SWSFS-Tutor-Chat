@@ -5,26 +5,32 @@ import Navbar from "./Navbar";
 import beep from "./beep.wav"
 import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
+import * as firebase from "firebase";
 
 class Chat extends Component {
 
     state = {
         connection: null, users: [], textArea: '',
-        username: this.props.location.username, message: '',
+        username: '', message: '',
         disconnected: false, toProfile: null,
         command: 'needHelp', usersNeedHelp: [],
         file: [], blobUrl: '', messages: []
     }
 
-    componentDidMount = () => {
-        if (this.state.username !== undefined) {
-            // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
-            let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
-            this.setState({
-                connection: connection
-            })
-            connection.onmessage = this.handleMessage;
+    componentWillMount = () => {
+        if (this.props.location.state !== undefined && this.props.location.state.username !== undefined) {
+            this.setState({username: this.props.location.state.username})
         }
+    }
+
+    componentDidMount = () => {
+        // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
+        let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+        this.setState({
+            connection: connection,
+        })
+        connection.onmessage = this.handleMessage;
+        this.initFirebase()
     }
 
     componentDidUpdate = () => {
@@ -33,6 +39,38 @@ class Chat extends Component {
                 disconnected: true
             })
         }
+    }
+
+    initFirebase = () => {
+
+        let config = {
+            apiKey: "AIzaSyClmWE8_C1mdd1HHgZpPXCEuk4niJaUNVU",
+            authDomain: "tutorchatcph.firebaseapp.com",
+            databaseURL: "https://tutorchatcph.firebaseio.com",
+            projectId: "tutorchatcph",
+            storageBucket: "tutorchatcph.appspot.com",
+            messagingSenderId: "500761769080"
+
+        }
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        const messaging = firebase.messaging();
+        messaging.requestPermission()
+            .then(() => {
+                messaging.getToken().then(token => {
+                    let msg = JSON.stringify({
+                        "toProfile": "",
+                        'fromProfile': this.state.username,
+                        'command': "webNoti",
+                        'content': token
+                    })
+                    this.state.connection.send(msg);
+                })
+            }).catch((err) => {
+            console.log(err)
+        })
+
     }
 
     handleMessage = (e) => {
@@ -58,7 +96,7 @@ class Chat extends Component {
                 this.setState({
                     toProfile: message.content,
                     textArea: chatMessages,
-                    command:'message'
+                    command: 'message'
                 })
             } else if (message.command === 'connectedUsers') {
                 if (message.content.split(";")[0] === "") {
@@ -80,7 +118,7 @@ class Chat extends Component {
     }
 
     takeUser = (user) => {
-        this.setState({command:"message"})
+        this.setState({command: "message"})
         let msg = JSON.stringify({
             'fromProfile': this.state.username,
             'command': "take",
@@ -142,6 +180,7 @@ class Chat extends Component {
 
     handleKeyPress = (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault();
             this.sendMessage();
         }
     }
@@ -158,19 +197,19 @@ class Chat extends Component {
         this.state.connection.send(msg);
     }
 
-    setFile=(e)=>{
-        this.setState({file:e.target.files});
+    setFile = (e) => {
+        this.setState({file: e.target.files});
     }
 
-    addSmiley=(e)=>{
-        this.setState((prevState)=>({message:prevState.message + e}))
+    addSmiley = (e) => {
+        this.setState((prevState) => ({message: prevState.message + e}))
     }
 
 
     render = () => {
-        if (this.state.username === undefined || this.state.disconnected) {
+        if (this.state.username.length <= 0 || this.state.disconnected) {
             return (
-                <Redirect to={'/TutorChat/'}/>
+                <Redirect to={'/'}/>
             )
         }
         return (
@@ -202,7 +241,7 @@ class Chat extends Component {
                                       style={{
                                           backgroundColor: "#f8f9fa",
                                           boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)",
-                                          overflowX:"hidden"
+                                          overflowX: "hidden"
                                       }}
                                       onChange={this.handleChange}/>
                         </div>

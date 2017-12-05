@@ -24,6 +24,7 @@ public class Profile implements Serializable {
     private Boolean tutor;
     private String assignedTutor;
     private byte[] buf;
+    private String token;
 
     @Transient
     private Session userSession;
@@ -31,6 +32,24 @@ public class Profile implements Serializable {
     public Profile() {
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Session getUserSession() {
+        return userSession;
+    }
+
+    public void setUserSession(Session userSession) {
+        this.userSession = userSession;
+    }
+
+    
+    
     public Session getSession() {
         return userSession;
     }
@@ -39,7 +58,7 @@ public class Profile implements Serializable {
         this.userSession = session;
     }
 
-    public Boolean getTutor() {
+    public Boolean isTutor() {
         return tutor;
     }
 

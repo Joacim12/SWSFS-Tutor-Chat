@@ -3,6 +3,7 @@ entity\Profile_.class
 model\MessageHandler.class
 entity\Profile.class
 model\ChatControl.class
+model\PushNotifier.class
 decoder\MessageDecoder.class
 facade\UserFacade.class
 entity\Message.class

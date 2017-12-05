@@ -18,7 +18,7 @@ class App extends Component {
     render() {
         if (this.state.redirect) {
             return (
-                <Redirect to={'/TutorChat/'}/>
+                <Redirect to={'/'}/>
             )
         }
 

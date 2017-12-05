@@ -23,8 +23,7 @@ public class MessageHandler {
     private static final List<Profile> ONLINEPROFILES = new CopyOnWriteArrayList();
     private static final Map<Profile, List<Message>> NOTGETTINGHELP = new ConcurrentHashMap();
     private final UserFacade USERFACADE = new UserFacade("PU");
-
-    ;
+    private final PushNotifier pushNotifier = new PushNotifier();
 
     public void addUser(Session session, Profile dbUser) throws EncodeException, IOException {
         dbUser.setSession(session);
@@ -32,10 +31,14 @@ public class MessageHandler {
         for (Message message : dbUser.getMessages()) {
             dbUser.getSession().getBasicRemote().sendObject(message);
         }
-        sendMessage(getNeedHelp());
-        for (Profile profile : ONLINEPROFILES) {
-            System.out.println(profile);
+        if (dbUser.isTutor()) {
+            USERFACADE.getProfiles().forEach(profile -> {
+                if (!profile.equals(dbUser) && !profile.getToken().isEmpty()) {
+                    pushNotifier.sendTutorNotification(profile.getToken(), profile.getUsername(),dbUser.getUsername());
+                }
+            });
         }
+        sendMessage(getNeedHelp());
     }
 
     public void disconnectHandler(Session session) throws EncodeException, IOException {
@@ -66,6 +69,10 @@ public class MessageHandler {
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
+        } else if (message.getCommand().equals("webNoti")) {
+            Profile p = USERFACADE.getProfileById(message.getFromProfile());
+            p.setToken(message.getContent());
+            USERFACADE.updateProfile(p);
         } else if (message.getCommand().equals("file") && message.getToProfile() != null) {
             Message m = new Message();
             m.setToProfile(message.getToProfile());
@@ -111,7 +118,7 @@ public class MessageHandler {
             getConnectedToTutor();
             sendMessage(getNeedHelp());
         } else if (message.getCommand().equals("needHelp")) {
-            if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).getTutor()) {
+            if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).isTutor()) {
                 NOTGETTINGHELP.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
                 NOTGETTINGHELP.get(findUser(message.getFromProfile())).add(message);
                 message.setToProfile(message.getFromProfile());
@@ -161,7 +168,7 @@ public class MessageHandler {
         m.setCommand("connectedUsers");
         m.setFromProfile("Server");
         for (Profile tutor : ONLINEPROFILES) {
-            if (tutor.getTutor()) {
+            if (tutor.isTutor()) {
                 StringJoiner sj = new StringJoiner(";");
                 m.setToProfile(tutor.getUsername());
                 ONLINEPROFILES.forEach(user -> {
@@ -179,7 +186,7 @@ public class MessageHandler {
 
     private List<Profile> getTutors() {
         List<Profile> tutore = new ArrayList();
-        ONLINEPROFILES.stream().filter((user) -> (user.getTutor())).forEachOrdered((user) -> {
+        ONLINEPROFILES.stream().filter((user) -> (user.isTutor())).forEachOrdered((user) -> {
             tutore.add(user);
         });
         return tutore;

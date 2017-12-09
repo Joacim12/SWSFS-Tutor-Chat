@@ -6,7 +6,7 @@
 ## How to part:
 How to get the code: Clone this repository :)
 Set up a system for local development:
- - Start med at få en server op der kan køre tomcat8, i mit tilfælde har jeg valgt en raspberry pi der kører headless raspbian, så jeg har slået ssh til. og bruger git bash til at forbinde med.
+ 1. Start med at få en server op der kan køre tomcat8, i mit tilfælde har jeg valgt en raspberry pi der kører headless raspbian, så jeg har slået ssh til. og bruger git bash til at forbinde med.
  - log in på server vha -ssh pi@ipadresse
  - sørg for at køre sudo apt-get update så du har den seneste pakke liste.
  - installer java: 

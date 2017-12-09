@@ -108,13 +108,20 @@ tryk ctrl +x for at gemme.
 - Højreklik på projektet vælg new og find Persistence unit, kald den "PU"
 - Lav en ny database connection til den database vi lavede tidligere med brugeren tutorChat (Brug MySQL Connector)
 - Under Source Packages vælg pakken facade, og åben klassen UserFacade
-- Kør filen og den opretter en bruger 'tutor', samt 'elev'
+- Kør filen og den opretter en bruger 'Tutor', samt 'Elev'
+- Du er nu live, og klar til at bygge videre på systemet :-)
+- Frontenden / React delen er i frontend mappen, og backenden i backend mappen.
 
 ## Deploy til server
 - Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
 - naviger til frontend mappen, og kør npm install via en terminal.
-- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "http://192.168.0.103/", gem ændringer.
+- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "ws://192.168.0.103/chat/", gem ændringer.
+- Samt "homepage" til din url på serveren, i mit tilfælde "http://192.168.0.103/chat".
 - kør npm run build
 - i netbeans hvor du har projektet åbent find web pages og fjern alt udover 'META-INF' og 'WEB-INF'
 - kopier herefter indholdet af build mappen fra frontend ind under webpages
 - build projektet i netbeans
+- Naviger til din servers ip:8080C/manager
+- Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
+- Undeploy alt udover /manager
+- Find ROOT.war filen i din target mappe, og deploy den.

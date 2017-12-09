@@ -60,8 +60,6 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-
-```
 tryk ctrl +x for at gemme.
    skriv kommando: sudo systemctl daemoen-reload
    skriv kommando: sudo systemctl start tomcat

@@ -134,7 +134,7 @@ tryk ctrl +x for at gemme.
 - Hvis du åbner ipen på din server vil du nu se en nginx side.
 #### Viderstil websockets, og request mod manager til tomcat
 - skriv kommando sudo nano /opt/tomcat/conf/server.xml
-- find de to connector port linjer og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
+- find de to connector tags og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
 - skriv kommando: sudo service tomcat restart, du kan nu ikke længere tilgå tomcat via port 8080
 #### Opsætning af nginx 
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default

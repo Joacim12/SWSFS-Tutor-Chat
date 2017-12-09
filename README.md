@@ -103,8 +103,12 @@ tryk ctrl +x for at gemme.
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
+- Højre klik på source packages vælg new, og opret en ny persistence unit
 - Nu kan du starte projektet men vi mangler stadig at forbinde til en database!
-- Højreklik på projektet vælg new og find Persistence unit
+- Højreklik på projektet vælg new og find Persistence unit, kald den "PU"
+- Lav en ny database connection til den database vi lavede tidligere med brugeren tutorChat (Brug MySQL Connector)
+- Under Source Packages vælg pakken facade, og åben klassen UserFacade
+- Kør filen og den opretter en bruger 'tutor', samt 'elev'
 
 #### Upload projektet til server
 - Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/

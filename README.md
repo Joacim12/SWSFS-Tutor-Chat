@@ -29,6 +29,7 @@ Set up a system for local development:
  #### Sæt tomcat op til at køre som en service:
    Start med at finde ud af hvor JAVA_HOME er, 
    - skriv kommando: sudo update-java-alternatives -l
+   
    i mit tilfælde er outputtet: jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    så mit JAVA_HOME er: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    - skriv kommando: sudo nano /etc/systemd/system/tomcat.service (for at lave en ny tomcat service fil) 

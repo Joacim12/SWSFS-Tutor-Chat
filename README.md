@@ -75,8 +75,7 @@ tryk ctrl +x for at gemme.
   skriv kommando: 
       sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
       Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
-      skriv kommando: sudo systemctl restart tomcat
-      
+      skriv kommando: sudo systemctl restart tomcat   
       Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
       
       Hvis alt virker husk at slå tomcat til at boote ved hver start:

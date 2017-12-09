@@ -28,16 +28,24 @@ public class MessageHandler {
     public void addUser(Session session, Profile dbUser) throws EncodeException, IOException {
         dbUser.setSession(session);
         ONLINEPROFILES.add(dbUser);
+        
+        // Sending previous messages to user, should probably send them as list
         for (Message message : dbUser.getMessages()) {
             dbUser.getSession().getBasicRemote().sendObject(message);
         }
+        
+        
+        // Sending a notification to users that has accepted receiving web notification about a new tutor has come online
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
-                if (!profile.equals(dbUser) && !profile.getToken().isEmpty()) {
+                if (!profile.equals(dbUser) && profile.getToken()!=null) {
                     pushNotifier.sendTutorNotification(profile.getToken(), profile.getUsername(),dbUser.getUsername());
                 }
             });
         }
+        
+        // Sending a message to tutors if there are any students that has requested help
+        System.out.println(getNeedHelp());
         sendMessage(getNeedHelp());
     }
 

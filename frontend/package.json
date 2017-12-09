@@ -1,5 +1,4 @@
 {
-  "homepage": "https://vetterlain.dk/TutorChat",
   "name": "tutorchat",
   "version": "0.1.0",
   "private": true,
@@ -16,6 +15,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy":"react-scripts build && xcopy /f /s /y build \\\\RASPBERRYPI\\WWW\\HTML",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }

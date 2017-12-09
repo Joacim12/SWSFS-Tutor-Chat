@@ -10,7 +10,7 @@ import Chat from "./components/Chat";
 class App extends Component {
     render() {
         return (
-            <Router basename={"/TutorChat"}>
+            <Router>
                 <Switch>
                     <Route exact path="/" component={Login}/>
                     <Route path="/chat" component={Chat}/>

@@ -29,12 +29,12 @@ public class UserFacade {
     public void tester() {
         Profile p = new Profile();
         p.setMessages(new ArrayList());
-        p.setUsername("t");
+        p.setUsername("Tutor");
         p.setTutor(Boolean.TRUE);
         createProfile(p);
         p = new Profile();
         p.setMessages(new ArrayList());
-        p.setUsername("j");
+        p.setUsername("Elev");
         p.setTutor(Boolean.FALSE);
         createProfile(p);
     }

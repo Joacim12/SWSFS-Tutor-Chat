@@ -1,10 +1,14 @@
 package entity;
 
+import static com.mysql.cj.core.MysqlType.BLOB;
 import java.io.Serializable;
+import static java.sql.JDBCType.BLOB;
+import static java.sql.Types.BLOB;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.websocket.Session;

@@ -52,7 +52,7 @@
     </dependencies>
 
     <build>
-        <finalName>TutorChat</finalName>
+        <finalName>ROOT</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>

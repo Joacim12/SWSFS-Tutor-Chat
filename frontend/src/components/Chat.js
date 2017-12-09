@@ -7,6 +7,7 @@ import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
 import * as firebase from "firebase";
 
+
 class Chat extends Component {
 
     state = {
@@ -17,15 +18,14 @@ class Chat extends Component {
         file: [], blobUrl: '', messages: []
     }
 
-    componentWillMount = () => {
+    componentWillMount () {
         if (this.props.location.state !== undefined && this.props.location.state.username !== undefined) {
             this.setState({username: this.props.location.state.username})
         }
     }
 
-    componentDidMount = () => {
-        // let connection = new WebSocket("ws://localhost:8084/TutorChat/chat/" + this.state.username);
-        let connection = new WebSocket("wss://vetterlain.dk/TutorChat/chat/" + this.state.username);
+    componentDidMount () {
+        let connection = new WebSocket("ws://192.168.0.103/chat/" + this.state.username);
         this.setState({
             connection: connection,
         })
@@ -33,7 +33,7 @@ class Chat extends Component {
         this.initFirebase()
     }
 
-    componentDidUpdate = () => {
+    componentDidUpdate (){
         if (this.state.connection.readyState >= 2) {
             this.setState({
                 disconnected: true
@@ -206,7 +206,7 @@ class Chat extends Component {
     }
 
 
-    render = () => {
+    render () {
         if (this.state.username.length <= 0 || this.state.disconnected) {
             return (
                 <Redirect to={'/'}/>

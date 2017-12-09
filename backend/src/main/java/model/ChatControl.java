@@ -48,6 +48,7 @@ public class ChatControl {
 
     @OnMessage
     public void onMessage(Session session, Message message) throws EncodeException, IOException {
+        System.out.println(message);
         mh.sendMessage(message);
     }
 

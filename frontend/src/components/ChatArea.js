@@ -28,7 +28,7 @@ class ChatArea extends Component {
 
     }
 
-    componentDidUpdate = () => {
+    componentDidUpdate (){
         this.scroll()
     }
 

@@ -21,7 +21,7 @@ public class Message implements Serializable {
     private String toProfile;
     private String fromProfile;
     private String command;
-    @Lob
+//    @Lob
     private String content;
 
     public Message() {

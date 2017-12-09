@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
-##How to part:
+## How to part:
 How to get the code: Clone this repository :)
 Set up a system for local development:
  - Start med at få en server op der kan køre tomcat8, i mit tilfælde har jeg valgt en raspberry pi der kører headless raspbian, så jeg har slået ssh til. og bruger git bash til at forbinde med.
@@ -33,6 +33,7 @@ Set up a system for local development:
    så mit JAVA_HOME er: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    skriv kommando: sudo nano /etc/systemd/system/tomcat.service (for at lave en ny tomcat service fil) 
    Kopier følgende(husk at ret din JAVA_HOME variabel):
+      ```
 [Unit]
 Description=Apache Tomcat Web Application Container
 After=network.target
@@ -58,8 +59,7 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
-
---------------------------------------
+```
 tryk ctrl +x for at gemme.
    skriv kommando: sudo systemctl daemoen-reload
    skriv kommando: sudo systemctl start tomcat

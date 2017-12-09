@@ -126,3 +126,8 @@ tryk ctrl +x for at gemme.
 - Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
 - Undeploy alt udover /manager
 - Find ROOT.war filen i din target mappe, og deploy den.
+- Systemet kan nu tilgås på 192:168.0.103:8080 !!
+
+## SSL / Proxy / Domæne (Optionel)
+#### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx, samt erhverve et domæne.
+- 

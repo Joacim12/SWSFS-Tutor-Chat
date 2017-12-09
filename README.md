@@ -131,4 +131,9 @@ tryk ctrl +x for at gemme.
 ## SSL / Proxy / Domæne (Optionel)
 #### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx, samt erhverve et domæne.
 - Skriv kommando: sudo apt-get install nginx
-- Hvis du åbner 
+- Hvis du åbner ipen på din server vil du nu se en nginx side.
+#### Viderstil websockets, og request mod manager til tomcat
+- skriv kommando sudo nano /opt/tomcat/conf/server.xml
+- find de to connector port linjer og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
+- skriv kommando: sudo service tomcat stop eftefulgt af sudo service tomcat start, du kan nu ikke længere tilgå tomcat via port 8080
+#### Opsætning af nginx 

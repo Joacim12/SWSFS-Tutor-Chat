@@ -79,3 +79,30 @@ tryk ctrl +x for at gemme.
       Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
       Hvis alt virker husk at slå tomcat til at boote ved hver start:
      - skriv kommando: sudo systemctl enable tomcat
+     
+## MYSQL
+- Skriv kommando: sudo apt-get install mysql-server
+- skriv kommando: mysql_secure_installation
+  - Fjern anonyme brugere
+  - Slå root login remotely fra
+  - Fjern test databaser
+  - Reload tabeller
+  - Skriv kommando: mysql -u root -p
+  - Skriv kommando: CREATE USER 'tutorChat'@'%' IDENTIFIED BY 'TutorLogin2017!';
+  - Skriv kommando: FLUSH PRIVILEGES;
+     
+#### Get the code
+- Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
+- Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
+- Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
+- Nu kan du starte projektet men vi mangler stadig at forbinde til en database!
+- Højreklik på projektet vælg new og find Persistence unit
+
+#### Upload projektet til server
+- Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
+- naviger til frontend mappen, og kør npm install via en terminal.
+- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "http://192.168.0.103/", gem ændringer.
+- kør npm run build
+- i netbeans hvor du har projektet åbent find web pages og fjern alt udover 'META-INF' og 'WEB-INF'
+- kopier herefter indholdet af build mappen fra frontend ind under webpages
+- build projektet i netbeans

@@ -33,7 +33,7 @@ Set up a system for local development:
    så mit JAVA_HOME er: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    skriv kommando: sudo nano /etc/systemd/system/tomcat.service (for at lave en ny tomcat service fil) 
    Kopier følgende(husk at ret din JAVA_HOME variabel):
-      ```
+```
 [Unit]
 Description=Apache Tomcat Web Application Container
 After=network.target
@@ -59,6 +59,8 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
+```
+
 ```
 tryk ctrl +x for at gemme.
    skriv kommando: sudo systemctl daemoen-reload

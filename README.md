@@ -75,4 +75,5 @@ tryk ctrl +x for at gemme.
     tryk ctrl + x for at lukke og gemme.
     
     skriv kommando: 
-
+      sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
+      Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->

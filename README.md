@@ -13,13 +13,13 @@ Set up a system for local development:
     sudo apt-get install default-jdk
  #### lav en tomcatuser:
  - skriv kommando: sudo groupadd tomcat
-  - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+ - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
  - download og installer tomcat
-    -find linket til den seneste tar.gz fil fra: https://tomcat.apache.org/download-80.cgi under binary distributions og så core
-    - skriv kommando: cd /tmp
-    - skriv kommando: curl -O http://ftp.download-by.net/apache/tomcat/tomcat-8/v8.5.24/bin/apache-tomcat-8.5.24.tar.gz
-    - skriv kommando: sudo mkdir /opt/tomcat
-    - skriv kommando: sudo tar xzvf apache-tomcat-8.5.24.tar.gz -C /opt/tomcat --strip-components=1
+ - find linket til den seneste tar.gz fil fra: https://tomcat.apache.org/download-80.cgi under binary distributions og så core
+ - skriv kommando: cd /tmp
+ - skriv kommando: curl -O http://ftp.download-by.net/apache/tomcat/tomcat-8/v8.5.24/bin/apache-tomcat-8.5.24.tar.gz
+ - skriv kommando: sudo mkdir /opt/tomcat
+ - skriv kommando: sudo tar xzvf apache-tomcat-8.5.24.tar.gz -C /opt/tomcat --strip-components=1
  #### Opdater tomcats tilladelser:
    - skriv kommando: cd /opt/tomcat
    - skriv kommando: sudo chgrp -R tomcat /opt/tomcat (Giver tomcat gruppen ejerskab over tomcat og undermapper)

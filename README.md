@@ -166,3 +166,18 @@ location /manager/ {
 
 ```
 
+
+
+#### Domæne
+Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domænet var gratis på dot.tk
+
+#### ssl certifikat
+Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
+Først lad os tilføje domæne navnene til vores nginx config fil.
+- Skriv kommando: sudo nano /etc/nginx/sites-available/default
+- find server_name og tilføj dit domæne, i mit tilfælde: server_name cphbusiness.tk www.cphbusiness.tk
+Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
+Følgende steps har jeg gjort for at installere et ssl certifikat på min server.
+- Først tilføjede jeg "deb http://ftp.debian.org/debian jessie-backports main" til min package list under /etc/apt/sources.list
+- herefter kørte jeg en sudo-apt get update
+- sudo apt-get install cerbot -t jessie-backports

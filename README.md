@@ -130,4 +130,5 @@ tryk ctrl +x for at gemme.
 
 ## SSL / Proxy / Domæne (Optionel)
 #### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx, samt erhverve et domæne.
-- 
+- Skriv kommando: sudo apt-get install nginx
+- Hvis du åbner 

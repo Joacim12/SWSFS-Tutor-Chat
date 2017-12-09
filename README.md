@@ -62,21 +62,20 @@ Restart=always
 WantedBy=multi-user.target
 ```
 tryk ctrl +x for at gemme.
-   skriv kommando: sudo systemctl daemoen-reload
-   skriv kommando: sudo systemctl start tomcat
-   skriv kommando: sudo systemctl status tomcat
+  - skriv kommando: sudo systemctl daemoen-reload
+  - skriv kommando: sudo systemctl start tomcat
+  - skriv kommando: sudo systemctl status tomcat
    
    Her skulle du gerne få en linje der er grøn og der står at tomcat kører :-)
    
--Opret en bruger til tomcats webinterface:
-  skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
-  Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
-  <user username="admin" password="password" roles="manager-gui,admin-gui"/> 
-  tryk ctrl + x for at lukke og gemme.
-  skriv kommando: 
-      sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
-      Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
-      skriv kommando: sudo systemctl restart tomcat   
+## Opret en bruger til tomcats webinterface:
+  - skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
+  - Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
+  ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
+  - tryk ctrl + x for at lukke og gemme.
+  - skriv kommando: sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
+    -  Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
+    -  skriv kommando: sudo systemctl restart tomcat   
       Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
       Hvis alt virker husk at slå tomcat til at boote ved hver start:
-      skriv kommando: sudo systemctl enable tomcat
+     - skriv kommando: sudo systemctl enable tomcat

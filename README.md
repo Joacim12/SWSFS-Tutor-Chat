@@ -69,7 +69,7 @@ tryk ctrl +x for at gemme.
    
    Her skulle du gerne få en linje der er grøn og der står at tomcat kører :-)
    
-## Opret en bruger til tomcats webinterface:
+#### Opret en bruger til tomcats webinterface:
   - skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
   - Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
   ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
@@ -81,7 +81,7 @@ tryk ctrl +x for at gemme.
       Hvis alt virker husk at slå tomcat til at boote ved hver start:
      - skriv kommando: sudo systemctl enable tomcat
      
-## MYSQL
+## MySQL
 - Skriv kommando: sudo apt-get install mysql-server
 - skriv kommando: mysql_secure_installation
   - Fjern anonyme brugere
@@ -100,18 +100,17 @@ tryk ctrl +x for at gemme.
 
 - Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
      
-#### Get the code
+## Get the code
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
-- Højre klik på source packages vælg new, og opret en ny persistence unit
 - Nu kan du starte projektet men vi mangler stadig at forbinde til en database!
 - Højreklik på projektet vælg new og find Persistence unit, kald den "PU"
 - Lav en ny database connection til den database vi lavede tidligere med brugeren tutorChat (Brug MySQL Connector)
 - Under Source Packages vælg pakken facade, og åben klassen UserFacade
 - Kør filen og den opretter en bruger 'tutor', samt 'elev'
 
-#### Upload projektet til server
+## Deploy til server
 - Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
 - naviger til frontend mappen, og kør npm install via en terminal.
 - åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "http://192.168.0.103/", gem ændringer.

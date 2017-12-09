@@ -70,9 +70,9 @@ tryk ctrl +x for at gemme.
 -Opret en bruger til tomcats webinterface:
   skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
   Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
-  <user username="admin" password="password" roles="manager-gui,admin-gui"/>
-    tryk ctrl + x for at lukke og gemme.
-    
+  <user username="admin" password="password" roles="manager-gui,admin-gui"/> 
+  tryk ctrl + x for at lukke og gemme.
+  
     skriv kommando: 
       sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
       Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->

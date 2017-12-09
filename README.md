@@ -135,5 +135,34 @@ tryk ctrl +x for at gemme.
 #### Viderstil websockets, og request mod manager til tomcat
 - skriv kommando sudo nano /opt/tomcat/conf/server.xml
 - find de to connector port linjer og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
-- skriv kommando: sudo service tomcat stop eftefulgt af sudo service tomcat start, du kan nu ikke længere tilgå tomcat via port 8080
+- skriv kommando: sudo service tomcat restart, du kan nu ikke længere tilgå tomcat via port 8080
 #### Opsætning af nginx 
+- Skriv kommando: sudo nano /etc/nginx/sites-available/default
+- Start med at tilføje følgende upstream blok:
+```
+upstream tomcat{
+  server 127.0.0.1:8080 fail_timeout=0;
+}
+```
+- for at viderstille websocketen tilføj følgende inde i din serverblok:
+```
+location /chat/ {
+                include proxy_params;
+                proxy_pass http://tomcat/chat/;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $http_connection;
+                proxy_read_timeout 864000;
+
+        }
+
+```
+- for at stadig kunne tilgå tomcat's manager tilføj følgende til server blokken:
+```
+location /manager/ {
+                include proxy_params;
+                proxy_pass http://tomcat/manager/;
+        }
+
+```
+

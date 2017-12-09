@@ -100,7 +100,7 @@ tryk ctrl +x for at gemme.
 
 - Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
      
-## Get the code
+## Get the code // Set up for local development
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.

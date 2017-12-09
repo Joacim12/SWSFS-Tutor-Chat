@@ -33,7 +33,7 @@ Set up a system for local development:
    i mit tilfælde er outputtet: jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    så mit JAVA_HOME er: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
    - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
-        -Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
+        - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
 ```
 [Unit]
 Description=Apache Tomcat Web Application Container

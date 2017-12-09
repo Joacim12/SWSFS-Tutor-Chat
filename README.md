@@ -115,7 +115,7 @@ tryk ctrl +x for at gemme.
 ## Deploy til server
 - Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
 - naviger til frontend mappen, og kør npm install via en terminal.
-- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "ws://192.168.0.103/chat/", gem ændringer.
+- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "ws://192.168.0.103:8080/chat/", gem ændringer.
 - Samt "homepage" til din url på serveren, i mit tilfælde "http://192.168.0.103:8080".
 - åben App.js og i Router tagget fjern "basename={"/TutorChat"}
 - kør npm run build

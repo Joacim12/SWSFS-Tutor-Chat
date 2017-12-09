@@ -87,9 +87,17 @@ tryk ctrl +x for at gemme.
   - Slå root login remotely fra
   - Fjern test databaser
   - Reload tabeller
-  - Skriv kommando: mysql -u root -p
-  - Skriv kommando: CREATE USER 'tutorChat'@'%' IDENTIFIED BY 'TutorLogin2017!';
-  - Skriv kommando: FLUSH PRIVILEGES;
+- Skriv kommando: mysql -u root -p
+- Skriv kommando: CREATE USER 'tutorChat'@'%' IDENTIFIED BY 'TutorLogin2017!';
+- Skriv kommando: CREATE DATABASE tutorchat;
+- Skriv kommando: GRANT ALL PRIVILEGES ON tutorchat.* TO 'tutorChat'@'%" IDENTIFIED BY 'TutorLogin2017!;
+- Skriv kommando: FLUSH PRIVILEGES;
+- Skriv kommando: sudo nano /etc/mysql/my.cnf
+- udkommenter bind address med #
+- Skriv kommando: sudo service mysql stop
+- Skriv kommando: sudo service mysql start
+
+- Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
      
 #### Get the code
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash

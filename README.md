@@ -30,10 +30,10 @@ Set up a system for local development:
    Start med at finde ud af hvor JAVA_HOME er, 
    - skriv kommando: sudo update-java-alternatives -l
    
-   i mit tilfælde er outputtet: jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
-   så mit JAVA_HOME er: /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
+   i mit tilfælde er outputtet: **jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
+   så mit JAVA_HOME er: **/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
    - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
-        - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
+     - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
 ```
 [Unit]
 Description=Apache Tomcat Web Application Container
@@ -42,7 +42,7 @@ After=network.target
 [Service]
 Type=forking
 
-Environment=JAVA_HOME=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
+Environment=JAVA_HOME=**/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
 Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
 Environment=CATALINA_HOME=/opt/tomcat
 Environment=CATALINA_BASE=/opt/tomcat

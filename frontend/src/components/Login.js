@@ -1,15 +1,38 @@
 import React, {Component} from 'react';
-import {Redirect} from 'react-router-dom'
+import {Link, Redirect} from 'react-router-dom'
 import Navbar from "./Navbar";
-
-
+import * as firebase from "firebase";
 
 class Login extends Component {
 
     state = {
         username: '',
-        redirect:false,
+        password:'',
+        redirect: false,
+        error:"",
     }
+
+    signIn = () => {
+        firebase.auth().signInWithEmailAndPassword(this.state.username, this.state.password)
+            .then(() => {
+                this.setState({redirect: true})
+            })
+            .catch( (error)=> {
+               this.setState({error})
+            });
+    }
+
+    renderError() {
+        if (this.state.error.code !== undefined) {
+            return (
+                <div className="alert alert-danger">
+                    <p>{this.state.error.code}</p>
+                    <p>{this.state.error.message}</p>
+                </div>
+            )
+        }
+    }
+
     handleInput = (event) => {
         this.setState({
             [event.target.name]: event.target.value
@@ -18,18 +41,14 @@ class Login extends Component {
 
     handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            this.setState({redirect:true})
+            this.signIn()
         }
     }
 
-    connect=()=>{
-        this.setState({redirect:true})
-    }
-
     render() {
-        if(this.state.redirect===true){
-            return(
-                <Redirect to={{pathname:"/chat",state:{username:this.state.username}}}/>
+        if (this.state.redirect === true) {
+            return (
+                <Redirect to={{pathname: "/chat", state: {username: this.state.username}}}/>
             )
         }
         return (
@@ -37,24 +56,25 @@ class Login extends Component {
                 <Navbar/>
                 <br/>
                 <h2 className="text-center">Welcome to TutorChat</h2>
+                {this.renderError()}
                 <div className="row">
                     <div className="col"></div>
                     <div className="col">
                         <br/>
-                        <input onKeyUp={this.handleKeyPress} className="form-control" onChange={this.handleInput} type="text"
+                        <label>Username:</label>
+                        <input className="form-control" onChange={this.handleInput}
+                               type="text"
                                placeholder="Username" name="username"/>
+                        <label>Password:</label>
+                        <input onKeyUp={this.handleKeyPress} className="form-control" onChange={this.handleInput}
+                               type="password"
+                               placeholder="Password" name="password"/>
                         <br/>
-                        <button className="btn btn-secondary" value="Connect" onClick={this.connect}>Connect</button>
-                        {/*<Link style={{margin: "10px"}} className="btn btn-warning" value="Create user "*/}
-                        {/*username={this.state.username}*/}
-                        {/*to={{*/}
-                        {/*pathname: "/TutorChat/chat",*/}
-                        {/*username: this.state.username,*/}
-                        {/*}}>Create user</Link>*/}
+                        <button className="btn btn-secondary" value="Connect" onClick={this.signIn}>Connect</button>
+                        <Link style={{margin: 10}} className="btn btn-warning" value="Create user" to="/register">Create
+                            user</Link>
                         <br/>
                         <hr/>
-                        {/*<h4>Tutors online:0</h4>*/}
-
                     </div>
                     <div className="col"></div>
                 </div>

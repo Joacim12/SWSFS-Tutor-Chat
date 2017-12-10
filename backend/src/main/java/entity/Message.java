@@ -9,7 +9,7 @@ import javax.persistence.Lob;
 
 /**
  *
- * @author joaci
+ * @author joacim
  */
 @Entity
 public class Message implements Serializable {

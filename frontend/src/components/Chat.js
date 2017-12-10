@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import {Redirect} from 'react-router-dom'
 import UserList from "./UserList";
 import Navbar from "./Navbar";
-import beep from "./beep.wav"
+import beep from "../resources/beep.wav"
 import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
 import * as firebase from "firebase";
+
+const webSocket = require("../../package.json").webSocket;
 
 
 class Chat extends Component {
@@ -18,22 +20,24 @@ class Chat extends Component {
         file: [], blobUrl: '', messages: []
     }
 
-    componentWillMount () {
+    componentWillMount() {
         if (this.props.location.state !== undefined && this.props.location.state.username !== undefined) {
             this.setState({username: this.props.location.state.username})
         }
     }
 
-    componentDidMount () {
-        let connection = new WebSocket("ws://192.168.0.103/chat/" + this.state.username);
+    componentDidMount() {
+        let connection = new WebSocket(webSocket + this.state.username);
         this.setState({
             connection: connection,
+        }, () => {
+            connection.onmessage = this.handleMessage;
+        }, () => {
+            this.initFirebase()
         })
-        connection.onmessage = this.handleMessage;
-        this.initFirebase()
     }
 
-    componentDidUpdate (){
+    componentDidUpdate() {
         if (this.state.connection.readyState >= 2) {
             this.setState({
                 disconnected: true
@@ -42,19 +46,6 @@ class Chat extends Component {
     }
 
     initFirebase = () => {
-
-        let config = {
-            apiKey: "AIzaSyClmWE8_C1mdd1HHgZpPXCEuk4niJaUNVU",
-            authDomain: "tutorchatcph.firebaseapp.com",
-            databaseURL: "https://tutorchatcph.firebaseio.com",
-            projectId: "tutorchatcph",
-            storageBucket: "tutorchatcph.appspot.com",
-            messagingSenderId: "500761769080"
-
-        }
-        if (!firebase.apps.length) {
-            firebase.initializeApp(config);
-        }
         const messaging = firebase.messaging();
         messaging.requestPermission()
             .then(() => {
@@ -70,7 +61,6 @@ class Chat extends Component {
             }).catch((err) => {
             console.log(err)
         })
-
     }
 
     handleMessage = (e) => {
@@ -206,7 +196,7 @@ class Chat extends Component {
     }
 
 
-    render () {
+    render() {
         if (this.state.username.length <= 0 || this.state.disconnected) {
             return (
                 <Redirect to={'/'}/>

@@ -1,10 +1,13 @@
+entity\Profile.class
+model\ChatControl.class
+entity\Message.class
+entity\ChatDebugger.class
+entity\ProfileJson.class
 entity\Message_.class
 entity\Profile_.class
 model\MessageHandler.class
-entity\Profile.class
-model\ChatControl.class
 model\PushNotifier.class
+decoder\DebugEncoder.class
 decoder\MessageDecoder.class
 facade\UserFacade.class
-entity\Message.class
 decoder\MessageEncoder.class

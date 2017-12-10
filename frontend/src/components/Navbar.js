@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Redirect} from "react-router-dom";
+import {logout} from "../js/firebase";
 
 class App extends Component {
 
@@ -12,6 +13,7 @@ class App extends Component {
     }
 
     signOut = () => {
+        logout();
         this.setState({redirect: true})
     }
 
@@ -28,7 +30,7 @@ class App extends Component {
                 <nav className="navbar navbar-expand-lg navbar-light bg-light"
                      style={{backgroundColor: "#f8f9fa", boxShadow: "0px 25px 73px -26px rgba(13,10,212,1)"}}>
                     <div className="container">
-                        <a className="navbar-brand" href="">TutorChat</a>
+                        <span className="navbar-brand" >TutorChat</span>
                         <div className="dropdown" onMouseEnter={this.handleHover} onMouseLeave={this.handleHover}
                              style={{backgroundColor: iClass}}>
                                 <span className="dropdown-toggle" id="dropdownMenu2" data-toggle="dropdown">
@@ -39,7 +41,7 @@ class App extends Component {
                                 <button className="dropdown-item" data-toggle="modal" data-target=".bd-example-modal-lg"
                                         type="button">Profile
                                 </button>
-                                <button onClick={this.signOut} className="dropdown-item" type="button">Sign out</button>
+                                <button className="dropdown-item" type="button" onClick={this.signOut}>Sign out</button>
                             </div>
                         </div>
 

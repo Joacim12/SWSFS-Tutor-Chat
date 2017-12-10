@@ -1,14 +1,10 @@
 package entity;
 
-import static com.mysql.cj.core.MysqlType.BLOB;
 import java.io.Serializable;
-import static java.sql.JDBCType.BLOB;
-import static java.sql.Types.BLOB;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.websocket.Session;
@@ -25,10 +21,11 @@ public class Profile implements Serializable {
     private String username;
     @OneToMany(cascade = CascadeType.PERSIST)
     private List<Message> messages;
-    private Boolean tutor;
+    private Boolean tutor = false;
     private String assignedTutor;
     private byte[] buf;
     private String token;
+    private boolean soundEnabled = true;
 
     @Transient
     private Session userSession;
@@ -36,6 +33,14 @@ public class Profile implements Serializable {
     public Profile() {
     }
 
+    public boolean isSoundEnabled() {
+        return soundEnabled;
+    }
+
+    public void setSoundEnabled(boolean soundEnabled) {
+        this.soundEnabled = soundEnabled;
+    }
+    
     public String getToken() {
         return token;
     }

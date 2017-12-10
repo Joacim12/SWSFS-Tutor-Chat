@@ -11,6 +11,9 @@ import org.apache.http.impl.client.HttpClients;
  * @author joaci
  */
 public class PushNotifier {
+    
+    private final static String URL = "https://cphbusiness.tk/";
+    
 
     public void sendTutorNotification(String token, String to,String tutor) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -23,8 +26,8 @@ public class PushNotifier {
             JsonObject notification = new JsonObject();
             notification.addProperty("title", "TutorChat");
             notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
-            notification.addProperty("icon", "https://vetterlain.dk/images/Yahoo-Messenger-icon.png");
-            notification.addProperty("click_action", "https://vetterlain.dk/TutorChat");
+//            notification.addProperty("icon", URL + " LINK TO IMAGE"); // no images on server currently
+            notification.addProperty("click_action", URL);
             j.add("notification", notification);
             StringEntity stringEntity = new StringEntity(j.toString());
             httpPost.getRequestLine();

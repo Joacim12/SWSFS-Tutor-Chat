@@ -177,7 +177,39 @@ Først lad os tilføje domæne navnene til vores nginx config fil.
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
 - find server_name og tilføj dit domæne, i mit tilfælde: server_name cphbusiness.tk www.cphbusiness.tk
 Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
-Følgende steps har jeg gjort for at installere et ssl certifikat på min server.
-- Først tilføjede jeg "deb http://ftp.debian.org/debian jessie-backports main" til min package list under /etc/apt/sources.list
-- herefter kørte jeg en sudo-apt get update
-- sudo apt-get install cerbot -t jessie-backports
+For at score a+ hos ssllabs skal vi også bruge en DH gruppe, det gøres på følgende måde:
+```
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+Vent nogle minutter og vi har en en DH gruppe placeret i ```/etc/ssl/certs/dhparam.pem```
+For at bruge certifikatet tast ```sudo nano /etc/nginx/snippets/ssl-params.conf```
+og kopier følgende ind og gem med ctrl + x:
+```
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+ssl_prefer_server_ciphers on;
+ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+ssl_ecdh_curve secp384r1;
+ssl_session_cache shared:SSL:10m;
+ssl_session_tickets off;
+ssl_stapling on;
+ssl_stapling_verify on;
+resolver 8.8.8.8 8.8.4.4 valid=300s;
+resolver_timeout 5s;
+# Disable preloading HSTS for now.  You can use the commented out header line that includes
+# the "preload" directive if you understand the implications.
+#add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+add_header Strict-Transport-Security "max-age=63072000; includeSubdomains";
+add_header X-Frame-Options DENY;
+add_header X-Content-Type-Options nosniff;
+
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+```
+åben nginx konfigurations filen ```sudo nano /etc/nginx/sites-available/default``` og tilføj ```include snippets/ssl-params.conf;```
+under server blok to.
+
+Genstart nginx med ```sudo systemctl restart nginx```
+
+Kør nu en test fra ssl labs, og du skulle gerne se et a+ :) 
+
+## SSH ved hjælp af keys.
+- For at sikre vores server lidt mere kan vi 

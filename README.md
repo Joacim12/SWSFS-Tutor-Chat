@@ -3,7 +3,9 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
-[Indledning](#how-to-part)
+[Indledning](#indledning)
+
+[How to alt](#how-to-part)
 
 [Tomcat](#tomcat)
 
@@ -18,6 +20,26 @@
 [Domæne](#domæne)
 
 [Sikring af SSH](#ssh-ved-hjælp-af-keys)
+
+## Indledning
+Et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
+
+Projektet er bygget op med en Java backend med jpa og en mysql database, en ReactJs frontend, og Firebase til authentication.
+Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}
+
+Lige nu er der tre parametre systemet "lytter" efter, "register", "debug" ellers "{brugernavn}"
+Hvis man kalder serveren på 127.0.0.1/chat/debug bliver der registreret en debgger session, hvor alle chat beskeder samt brugere der logger ind/ud bliver sendt til.
+
+Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
+
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere.
+
+Her er chat protokollen som der ser ud lige nu:
+| First Header  | Second Header | Protokol |
+| ------------- | ------------- |----------|
+| Content Cell  | Content Cell  |          |
+| Content Cell  | Content Cell  |          |
+
 
 ## How to part:
 #### Set up a system for local development:

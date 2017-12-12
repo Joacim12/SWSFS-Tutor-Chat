@@ -177,7 +177,7 @@ public void sendTutorNotification(String token, String to,String tutor) {
         }
     }
 ```
-
+key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
 
 ## How to part:
 #### Set up a system for local development:

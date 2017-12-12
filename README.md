@@ -3,15 +3,152 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
+[Indledning](#indledning)
+
+[Kommandoer](#kommandoer)
+
+[Firebase](#firebase)
+
+[How to alt](#how-to-part)
+
+[Tomcat](#tomcat)
+
+[MySQL](#mysql)
+
+[Getting the code / Local development](#local-development)
+
+[Deploying to server](#deploy-til-server)
+
+[Nginx opsætning](#proxy-nginx)
+
+[Domæne](#domæne)
+
+[Sikring af SSH](#ssh-ved-hjælp-af-keys)
+
+## Indledning
+Dette er et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
+
+Projektet er bygget op med en Java backend med jpa og en mysql database, en ReactJs frontend, og Firebase til authentication.
+Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}
+
+Lige nu er der tre parametre systemet "lytter" efter, "register", "debug" ellers "{brugernavn}"
+Hvis man kalder serveren på 127.0.0.1/chat/debug bliver der registreret en debgger session, hvor alle chat beskeder samt brugere der logger ind/ud bliver sendt til.
+
+Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
+
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
+
+Det hele er bygget op omkring en Message klasse, den har følgende attributter:
+
+| toProfile | fromProfile | command | content |
+| --- | --- | --- | --- |
+| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+
+## Kommandoer
+
+- needHelp
+```javascript 
+{"fromProfile":"brugernavn","command":"needHelp","content":"hej"} 
+```
+Bliver brugt når en bruger logger ind, for at tilføje ham til listen over brugere der ikke får hjælp lige nu, og denne liste vil hererefter blive broadcastet til alle tutorer, samt sender en besked retur til brugeren hvor der står "hej"
+- Message
+```javascript 
+{"toProfile":"user","fromProfile":"user1","command":"message","content":"hej"} 
+```
+Vil sende en besked fra joacim@vetterlain.dk til tutor@cphbusiness.dk med indholdet "Hej tutor!"
+- Take
+```javascript 
+{"fromProfile":"tutor","command":"take","content":"user"} 
+```
+Vil tage fat i useren "user" og sætte userens assignedTutor attribut til "tutor" samt fjerne "user" fra notGettingHelp listen
+```javascript 
+{"fromProfile":"user","command":"webNoti","content":"1782489uajhdfkuah389fha9u3agknfdg"} 
+```
+- webNoti
+Hvis brugeren siger ja til at modtage beskeder fra siden, bliver denne besked sendt til serveren med brugerens web notifikations token, og token bliver tilknyttet brugeren i databasen, så vi kan sende push notifikationer til brugerens browser/telefon
+```javascript 
+{"fromProfile":"user","command":"webNoti","content":"1782489uajhdfkuah389fha9u3agknfdg"} 
+```
+- file
+```javascript 
+{"fromProfile":"user","toProfile":"tutor","command":"file","content":"fil.jpg"} 
+```
+Vil sende filen "fil.jpg" fra "user" til "tutor", max filstørrelse 25mb.
+
+- setTutor
+```javascript 
+{"fromProfile":"Server","toProfile":"user","command":"setTutor","content":"tutor"} 
+```
+Vil blive send til "user" og i frontenden vil brugerens send til blive sat til "tutor"
+- release
+```javascript 
+{"toProfile":"server","fromProfile":"Tutor","toProfile":"server","command":"release","content":"user"} 
+```
+sætter "user"'s assigned attribut til "" og tilføjer "user" til notGettingHelp listen i backend + sender en besked til alle tutorer om at der er en bruger der ikke får hjælp.
+
+## Firebase
+I frontenden samt backenden bliver firebase brugt. 
+- Frontend:
+I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
+Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
+
+I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
+```javascript
+  /**
+     * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
+     * username there aswell.
+     */
+    register = () => {
+        let profile = {
+            "command": "createUser",
+            "content": this.state.email
+        }
+
+        firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+            .then(() => {
+                this.state.connection.send(JSON.stringify(profile));
+                this.setState({error:"",success: true})
+            })
+            .catch(error => {
+                this.setState({error})
+            });
+    }
+```
+
+i Chat.js bruges den til at sætte en webNotifikation op: 
+```javascript
+ requestWebNotificationPermission = () => {
+        const messaging = firebase.messaging();
+        messaging.requestPermission()
+            .then(() => {
+                messaging.getToken().then(token => {
+                    let msg = JSON.stringify({
+                        "toProfile": "",
+                        'fromProfile': this.state.username,
+                        'command': "webNoti",
+                        'content': token
+                    })
+                    this.state.connection.send(msg);
+                })
+            }).catch((err) => {
+            console.log(err) //No error handling :(
+        })
+    }
+```
+For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
+
 ## How to part:
 #### Set up a system for local development:
 
+Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
+sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
+skriv ```adduser tutorchat```
+efterfulgt af ```usermod -a -G sudo tutorchat``` for at tilføje den nye bruger til sudo gruppen.
+
 ## TOMCAT
-- Start med at få en server op der kan køre tomcat8, i mit tilfælde har jeg valgt en raspberry pi der kører headless raspbian, så jeg har slået ssh til. og bruger git bash til at forbinde med.
- - log in på server vha -ssh pi@ipadresse
- - sørg for at køre sudo apt-get update så du har den seneste pakke liste.
- - installer java: 
-    sudo apt-get install default-jdk
+ - log ind på din server vha ```-ssh brugernavn@ipadresse```
+ - sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
+ - installer java: ```sudo apt-get install default-jdk```
  #### lav en tomcatuser:
  - skriv kommando: sudo groupadd tomcat
  - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
@@ -35,7 +172,7 @@
    så mit JAVA_HOME er: **/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
    - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
      - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
-```
+```Shell
 [Unit]
 Description=Apache Tomcat Web Application Container
 After=network.target
@@ -100,7 +237,7 @@ tryk ctrl +x for at gemme.
 
 - Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
      
-## Get the code // Set up for local development
+## Local development
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
@@ -128,25 +265,57 @@ tryk ctrl +x for at gemme.
 - Find ROOT.war filen i din target mappe, og deploy den.
 - Systemet kan nu tilgås på 192:168.0.103:8080 !!
 
-## SSL / Proxy / Domæne (Optionel)
-#### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx, samt erhverve et domæne.
+## Proxy nginx
+#### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx
 - Skriv kommando: sudo apt-get install nginx
 - Hvis du åbner ipen på din server vil du nu se en nginx side.
-#### Viderstil websockets, og request mod manager til tomcat
+#### Viderstil websockets, og requests mod manager til tomcat
 - skriv kommando sudo nano /opt/tomcat/conf/server.xml
 - find de to connector tags og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
 - skriv kommando: sudo service tomcat restart, du kan nu ikke længere tilgå tomcat via port 8080
 #### Opsætning af nginx 
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
-- Start med at tilføje følgende upstream blok:
-```
+Jeg har lavet følgende konfigurations fil der sørger for det hele, med kommentarer :) 
+```Shell
+# TutorChat NGINX Conf
+
+
+# Tomcat serverens adresse
 upstream tomcat{
   server 127.0.0.1:8080 fail_timeout=0;
 }
-```
-- for at viderstille websocketen tilføj følgende inde i din serverblok:
-```
-location /chat/ {
+
+# Viderstil alt trafik til https
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name cphbusiness.tk www.cphbusiness.tk;
+        return 301 https://server_name$request_uri;
+}
+
+
+# SSL Konfiguration
+server{
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+
+        include snippets/ssl-cphbusiness.tk.conf;
+        include snippets/ssl-params.conf;
+
+        root /var/www/html;
+
+        index index.html;
+
+        server_name cphbusiness.tk www.cphbusiness.tk;
+
+
+        # Standard lokation
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        # /Chat/ viderstiller/opgraderer websockets til tomcat serveren
+        location /chat/ {
                 include proxy_params;
                 proxy_pass http://tomcat/chat/;
                 proxy_http_version 1.1;
@@ -156,28 +325,80 @@ location /chat/ {
 
         }
 
-```
-- for at stadig kunne tilgå tomcat's manager tilføj følgende til server blokken:
-```
-location /manager/ {
+
+        # Giver os adgang til tomcats manager interface
+        location /manager/ {
                 include proxy_params;
                 proxy_pass http://tomcat/manager/;
         }
+}
 
 ```
+- Som det ses i Java backenden understøtter vi at sende filer op til 25mb, 
+skriv ```sudo nano /etc/nginx/nginx.conf``` og tilføj linjen ``` client_max_body_size 25M; ``` under http blokken.
 
 
-
-#### Domæne
+## Domæne
 Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domænet var gratis på dot.tk
 
-#### ssl certifikat
+#### SSL Certifikat
 Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
 Først lad os tilføje domæne navnene til vores nginx config fil.
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
-- find server_name og tilføj dit domæne, i mit tilfælde: server_name cphbusiness.tk www.cphbusiness.tk
-Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
-Følgende steps har jeg gjort for at installere et ssl certifikat på min server.
-- Først tilføjede jeg "deb http://ftp.debian.org/debian jessie-backports main" til min package list under /etc/apt/sources.list
-- herefter kørte jeg en sudo-apt get update
-- sudo apt-get install cerbot -t jessie-backports
+- Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
+For at score a+ hos ssllabs skal vi også bruge en DH gruppe, det gøres på følgende måde:
+```
+sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+```
+Vent nogle minutter og vi har en en DH gruppe placeret i ```Shell /etc/ssl/certs/dhparam.pem```
+For at bruge certifikatet tast ```Shell sudo nano /etc/nginx/snippets/ssl-params.conf```
+og kopier følgende ind og gem med ctrl + x:
+```Shell
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+ssl_prefer_server_ciphers on;
+ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+ssl_ecdh_curve secp384r1;
+ssl_session_cache shared:SSL:10m;
+ssl_session_tickets off;
+ssl_stapling on;
+ssl_stapling_verify on;
+resolver 8.8.8.8 8.8.4.4 valid=300s;
+resolver_timeout 5s;
+# Disable preloading HSTS for now.  You can use the commented out header line that includes
+# the "preload" directive if you understand the implications.
+#add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";
+add_header Strict-Transport-Security "max-age=63072000; includeSubdomains";
+add_header X-Frame-Options DENY;
+add_header X-Content-Type-Options nosniff;
+
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+```
+åben nginx konfigurations filen ```sudo nano /etc/nginx/sites-available/default``` og tilføj ```include snippets/ssl-params.conf;```
+under server blok to.
+
+Genstart nginx med ```sudo systemctl restart nginx```
+
+Kør nu en test fra ssl labs, og du skulle gerne se et a+ :) 
+
+## SSH ved hjælp af keys.
+- For at sikre vores server lidt mere kan vi sætte den op så vi skal bruge en ssh key for at logge ind.
+Start med at generer en nøgle på din lokale maskine ved at skrive ```ssh-keygen```cd
+- åben ssh.pub filen og kopier indholdet
+- på din server som root brugeren skriv ``` su - tutorchat ``` for at skifte til brugeren
+- Lav en ny mappe ``` mkdir .ssh ``` begræns adgangen til mappen med ``` chmod 700 .ssh```
+- Lav en ny fil i mappen ``` ssudo nano .ssh/authorized_keys ``` indsæt indholdet af ssh.pub her og gem filen med ctrl + x, begræns herefter adgangen til filen ``` chmod 600 .ssh/authorized_keys ``` efterfulgt af ``` exit ```
+- Åben ``` sudo nano /etc/ssh/sshd_config ``` og find linjerne erstat følgende
+```Shell
+#PermitRootLogin yes
+#PasswordAuthentication yes
+UsePAM yes
+```
+med
+```
+PermitRootLogin no
+PasswordAuthentication no
+UsePAM no
+```
+- Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
+eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```
+

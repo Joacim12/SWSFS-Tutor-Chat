@@ -22,7 +22,7 @@
 [Sikring af SSH](#ssh-ved-hjælp-af-keys)
 
 ## Indledning
-Et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
+Dette er et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
 
 Projektet er bygget op med en Java backend med jpa og en mysql database, en ReactJs frontend, og Firebase til authentication.
 Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}
@@ -35,9 +35,9 @@ Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en bes
 Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere.
 
 Her er chat protokollen som der ser ud lige nu:
-| First Header  | Second Header | Protokol |
+| Kommando  | Formål | Protokol |
 | ------------- | ------------- |----------|
-| Content Cell  | Content Cell  |          |
+| Message  | Sender en besked |          |
 | Content Cell  | Content Cell  |          |
 
 

@@ -5,6 +5,8 @@
 
 [Indledning](#indledning)
 
+[Demo](#demo)
+
 [Kommandoer](#kommandoer)
 
 [Firebase](#firebase)
@@ -43,6 +45,9 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 | toProfile | fromProfile | command | content |
 | --- | --- | --- | --- |
 | Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+
+## Demo
+Åben https://cphbusiness.tk og log ind med demo@demo.dk // demo1234 skriv en besked og se den blive sendt til dig selv! åben evt en fane mere og login med tutor@cphbusiness.tk // tutor12 og se at du kan vælge demo@demo.dk og skrive/sende filer frem og tilbage + du får en push notifikation når tutor logger ind(Hvis du tillader meddelelser)
 
 ## Kommandoer
 

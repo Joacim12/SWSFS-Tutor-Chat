@@ -92,7 +92,7 @@ I frontenden samt backenden bliver firebase brugt.
 I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
 Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
 
-I Register.js importerer vi firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
+I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
 ```javascript
   /**
      * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
@@ -115,7 +115,7 @@ I Register.js importerer vi firebase.js filen ```javascript    import firebase f
     }
 ```
 
-i Chat.js bruger vi den til at sætte en webNotifikation op: 
+i Chat.js bruges den til at sætte en webNotifikation op: 
 ```javascript
  requestWebNotificationPermission = () => {
         const messaging = firebase.messaging();
@@ -135,7 +135,7 @@ i Chat.js bruger vi den til at sætte en webNotifikation op:
         })
     }
 ```
-
+For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
 
 ## How to part:
 #### Set up a system for local development:

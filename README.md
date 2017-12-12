@@ -6,8 +6,12 @@
 ## How to part:
 #### Set up a system for local development:
 
-## TOMCAT
 Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
+sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
+skriv ```adduser tutorchat```
+efterfulgt af ```usermod -a -G sudo tutorchat``` for at tilføje den nye bruger til sudo gruppen.
+
+## TOMCAT
  - log ind på din server vha ```-ssh brugernavn@ipadresse```
  - sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
  - installer java: ```sudo apt-get install default-jdk```
@@ -244,4 +248,23 @@ Genstart nginx med ```sudo systemctl restart nginx```
 Kør nu en test fra ssl labs, og du skulle gerne se et a+ :) 
 
 ## SSH ved hjælp af keys.
-- For at sikre vores server lidt mere kan vi 
+- For at sikre vores server lidt mere kan vi sætte den op så vi skal bruge en ssh key for at logge ind.
+Start med at generer en nøgle på din lokale maskine ved at skrive ```ssh-keygen```cd
+- åben ssh.pub filen og kopier indholdet
+- på din server som root brugeren skriv ``` su - tutorchat ``` for at skifte til brugeren
+- Lav en ny mappe ``` mkdir .ssh ``` begræns adgangen til mappen med ``` chmod 700 .ssh```
+- Lav en ny fil i mappen ``` ssudo nano .ssh/authorized_keys ``` indsæt indholdet af ssh.pub her og gem filen med ctrl + x, begræns herefter adgangen til filen ``` chmod 600 .ssh/authorized_keys ``` efterfulgt af ``` exit ```
+- Åben ``` sudo nano /etc/ssh/sshd_config ``` og find linjerne erstat følgende
+```Shell
+#PermitRootLogin yes
+#PasswordAuthentication yes
+UsePAM yes
+```
+med
+```
+PermitRootLogin no
+PasswordAuthentication no
+UsePAM no
+```
+- Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
+eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```

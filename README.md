@@ -151,7 +151,7 @@ tryk ctrl +x for at gemme.
 #### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx
 - Skriv kommando: sudo apt-get install nginx
 - Hvis du åbner ipen på din server vil du nu se en nginx side.
-#### Viderstil websockets, og request mod manager til tomcat
+#### Viderstil websockets, og requests mod manager til tomcat
 - skriv kommando sudo nano /opt/tomcat/conf/server.xml
 - find de to connector tags og tilføj: "address="127.0.0.1" tryk ctrl + x for at gemme, nu er det kun localhost der kan tilgå tomcat.
 - skriv kommando: sudo service tomcat restart, du kan nu ikke længere tilgå tomcat via port 8080
@@ -172,7 +172,7 @@ server {
         listen 80 default_server;
         listen [::]:80 default_server;
         server_name cphbusiness.tk www.cphbusiness.tk;
-        return 301 https://cphbusiness.tk$request_uri;
+        return 301 https://server_name$request_uri;
 }
 
 
@@ -227,8 +227,7 @@ Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domæ
 Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
 Først lad os tilføje domæne navnene til vores nginx config fil.
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
-- find server_name og tilføj dit domæne, i mit tilfælde: server_name cphbusiness.tk www.cphbusiness.tk
-Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
+- Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
 For at score a+ hos ssllabs skal vi også bruge en DH gruppe, det gøres på følgende måde:
 ```
 sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048

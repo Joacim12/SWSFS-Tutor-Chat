@@ -7,6 +7,8 @@
 
 [Kommandoer](#kommandoer)
 
+[Firebase](#firebase)
+
 [How to alt](#how-to-part)
 
 [Tomcat](#tomcat)
@@ -48,7 +50,7 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 ```javascript 
 {"fromProfile":"brugernavn","command":"needHelp","content":"hej"} 
 ```
-Bliver brugt når en bruger logger ind, for at tilføje ham til listen over brugere der ikke får hjælp lige nu, samt sender en besked retur til brugeren hvor der står "hej"
+Bliver brugt når en bruger logger ind, for at tilføje ham til listen over brugere der ikke får hjælp lige nu, og denne liste vil hererefter blive broadcastet til alle tutorer, samt sender en besked retur til brugeren hvor der står "hej"
 - Message
 ```javascript 
 {"toProfile":"user","fromProfile":"user1","command":"message","content":"hej"} 
@@ -78,6 +80,62 @@ Vil sende filen "fil.jpg" fra "user" til "tutor", max filstørrelse 25mb.
 {"fromProfile":"Server","toProfile":"user","command":"setTutor","content":"tutor"} 
 ```
 Vil blive send til "user" og i frontenden vil brugerens send til blive sat til "tutor"
+- release
+```javascript 
+{"toProfile":"server","fromProfile":"Tutor","toProfile":"server","command":"release","content":"user"} 
+```
+sætter "user"'s assigned attribut til "" og tilføjer "user" til notGettingHelp listen i backend + sender en besked til alle tutorer om at der er en bruger der ikke får hjælp.
+
+## Firebase
+I frontenden samt backenden bliver firebase brugt. 
+- Frontend:
+I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
+Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
+
+I Register.js importerer vi firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
+```javascript
+  /**
+     * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
+     * username there aswell.
+     */
+    register = () => {
+        let profile = {
+            "command": "createUser",
+            "content": this.state.email
+        }
+
+        firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+            .then(() => {
+                this.state.connection.send(JSON.stringify(profile));
+                this.setState({error:"",success: true})
+            })
+            .catch(error => {
+                this.setState({error})
+            });
+    }
+```
+
+i Chat.js bruger vi den til at sætte en webNotifikation op: 
+```javascript
+ requestWebNotificationPermission = () => {
+        const messaging = firebase.messaging();
+        messaging.requestPermission()
+            .then(() => {
+                messaging.getToken().then(token => {
+                    let msg = JSON.stringify({
+                        "toProfile": "",
+                        'fromProfile': this.state.username,
+                        'command': "webNoti",
+                        'content': token
+                    })
+                    this.state.connection.send(msg);
+                })
+            }).catch((err) => {
+            console.log(err) //No error handling :(
+        })
+    }
+```
+
 
 ## How to part:
 #### Set up a system for local development:

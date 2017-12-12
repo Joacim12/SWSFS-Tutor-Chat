@@ -35,7 +35,7 @@
    så mit JAVA_HOME er: **/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
    - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
      - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
-```
+```Shell
 [Unit]
 Description=Apache Tomcat Web Application Container
 After=network.target
@@ -72,7 +72,8 @@ tryk ctrl +x for at gemme.
 #### Opret en bruger til tomcats webinterface:
   - skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
   - Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
-  ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
+  ```Shell
+  <user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
   - tryk ctrl + x for at lukke og gemme.
   - skriv kommando: sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
     -  Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
@@ -139,13 +140,13 @@ tryk ctrl +x for at gemme.
 #### Opsætning af nginx 
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
 - Start med at tilføje følgende upstream blok:
-```
+```Shell
 upstream tomcat{
   server 127.0.0.1:8080 fail_timeout=0;
 }
 ```
 - for at viderstille websocketen tilføj følgende inde i din serverblok:
-```
+```Shell
 location /chat/ {
                 include proxy_params;
                 proxy_pass http://tomcat/chat/;
@@ -158,7 +159,7 @@ location /chat/ {
 
 ```
 - for at stadig kunne tilgå tomcat's manager tilføj følgende til server blokken:
-```
+```Shell
 location /manager/ {
                 include proxy_params;
                 proxy_pass http://tomcat/manager/;
@@ -178,11 +179,11 @@ Først lad os tilføje domæne navnene til vores nginx config fil.
 - find server_name og tilføj dit domæne, i mit tilfælde: server_name cphbusiness.tk www.cphbusiness.tk
 Installer certbot fra lets encrypt for at få et gratis ssl certifikat de har guides til de fleste os'er her: https://certbot.eff.org
 For at score a+ hos ssllabs skal vi også bruge en DH gruppe, det gøres på følgende måde:
-```
+```Shell
 sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
 ```
-Vent nogle minutter og vi har en en DH gruppe placeret i ```/etc/ssl/certs/dhparam.pem```
-For at bruge certifikatet tast ```sudo nano /etc/nginx/snippets/ssl-params.conf```
+Vent nogle minutter og vi har en en DH gruppe placeret i ```Shell /etc/ssl/certs/dhparam.pem```
+For at bruge certifikatet tast ```Shell sudo nano /etc/nginx/snippets/ssl-params.conf```
 og kopier følgende ind og gem med ctrl + x:
 ```Shell
 ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
@@ -204,10 +205,10 @@ add_header X-Content-Type-Options nosniff;
 
 ssl_dhparam /etc/ssl/certs/dhparam.pem;
 ```
-åben nginx konfigurations filen ```sudo nano /etc/nginx/sites-available/default``` og tilføj ```include snippets/ssl-params.conf;```
+åben nginx konfigurations filen ```Shell sudo nano /etc/nginx/sites-available/default``` og tilføj ```Shell include snippets/ssl-params.conf;```
 under server blok to.
 
-Genstart nginx med ```sudo systemctl restart nginx```
+Genstart nginx med ```Shell sudo systemctl restart nginx```
 
 Kør nu en test fra ssl labs, og du skulle gerne se et a+ :) 
 

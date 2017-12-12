@@ -9,7 +9,7 @@
 
 [MySQL](#mysql)
 
-[Getting the code](#get)
+[Getting the code](#get-the-code)
 
 ## How to part:
 #### Set up a system for local development:

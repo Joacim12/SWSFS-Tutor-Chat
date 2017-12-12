@@ -99,6 +99,9 @@ I frontenden samt backenden bliver firebase brugt.
 I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
 Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
 
+I firebase konsollen skal authentication lige slåes til, det vælges ved at trykke på authenticaton og start using authentication.
+
+
 I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
 ```javascript
   /**
@@ -122,6 +125,8 @@ I Register.js importeres firebase.js filen ```javascript    import firebase from
     }
 ```
 
+
+
 i Chat.js bruges den til at sætte en webNotifikation op: 
 ```javascript
  requestWebNotificationPermission = () => {
@@ -143,6 +148,36 @@ i Chat.js bruges den til at sætte en webNotifikation op:
     }
 ```
 For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
+
+- Backend
+I backenden bruges det til at sende push notifikationerne til de brugere der har tilladt det, det gøres i PushNotifier klassen, her har jeg implementeret en http klient der sender en post til firebase's server med et objekt der indeholder data til den notifikation jeg vil sende, det ser således ud:
+
+```java 
+public void sendTutorNotification(String token, String to,String tutor) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("https://fcm.googleapis.com/fcm/send");
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", "key=AAAAdJe6NHg:APA91bGtqcE4d0Tpt8yZxdfA30wR7vsvUAHlO4IFJ6C1_UhU1WR-ToW_dOX5gdZPDYSSctWmA3YgYsUJNjEHLEUZ53zDS1qGHkRuiIpQ3mReeFK8nczo9ePDJDpaTxOd-3DVuR5bI1zZ");
+        try {
+            JsonObject j = new JsonObject();
+            j.addProperty("to", token);
+            JsonObject notification = new JsonObject();
+            notification.addProperty("title", "TutorChat");
+            notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
+            notification.addProperty("icon", "https://www.vulgaris-medical.com/sites/default/files/styles/big-lightbox/public/field/image/actualites/2016/02/12/le-chat-source-de-bienfaits-pour-votre-sante.jpg"); 
+            notification.addProperty("click_action", URL);
+            j.add("notification", notification);
+            StringEntity stringEntity = new StringEntity(j.toString());
+            httpPost.getRequestLine();
+            httpPost.setEntity(stringEntity);
+            httpClient.execute(httpPost);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+```
+
 
 ## How to part:
 #### Set up a system for local development:

@@ -3,12 +3,10 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
-[Ready, set, GO!](#ready-set-go)
-
-
-
-##Indhold:
-(#Indledning)
+[Indledning](## How to part:)
+[Tomcat](## TOMCAT)
+[MySQL](## MySQL)
+[Getting the code](## Get the code // Set up for local development)
 
 ## How to part:
 #### Set up a system for local development:
@@ -275,4 +273,4 @@ UsePAM no
 ```
 - Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
 eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```
-# ready-set-go
+

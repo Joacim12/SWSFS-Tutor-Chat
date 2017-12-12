@@ -40,6 +40,11 @@ Her er chat protokollen som der ser ud lige nu:
 | Message  | Sender en besked | a|
 | Content Cell  | Content Cell  | a |
 
+| Command | Description |
+| --- | --- |
+| git status | List all new or modified files |
+| git diff | Show file differences that haven't been staged |
+
 
 ## How to part:
 #### Set up a system for local development:

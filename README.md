@@ -36,9 +36,9 @@ Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forb
 
 Her er chat protokollen som der ser ud lige nu:
 | Kommando  | Formål | Protokol |
-| ------------- | ------------- |----------|
-| Message  | Sender en besked |          |
-| Content Cell  | Content Cell  |          |
+|---|---|---|
+| Message  | Sender en besked | a|
+| Content Cell  | Content Cell  | a |
 
 
 ## How to part:

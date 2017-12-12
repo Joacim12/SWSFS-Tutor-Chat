@@ -40,25 +40,23 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 | --- | --- | --- | --- |
 | Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
 
-Eksempel:
+Eksempeler på beskeder til server:
 
-| toProfile | fromProfile | command | content |
-| --- | --- | --- | --- |
-| tutor@cphbusiness.tk | joacim@vetterlain.dk | message | Hej tutor! |
-
-Ville sende en besked fra joacim@vetterlain.dk til tutor@cphbusiness.dk med indholdet "Hej tutor!"
-
-Her er de forskellige kommandoer:
-
-| Kommando | beskrivelse | eksempel |
-| --- | --- | --- |
-| message | brugt til at sende beskeder | 
+- needHelp
+```javascript 
+{toProfile:"",fromProfile:"brugernavn",command:"needHelp",content:"hej"} 
+```
+Bliver brugt når en bruger logger ind, for at tilføje ham til listen over brugere der ikke får hjælp lige nu, samt sender en besked retur til brugeren hvor der står "hej"
+- Message
 ```javascript 
 {toProfile:"user",fromProfile:"user1",command:"message",content:"hej"} 
-``` 
-|
-| take | bruges til tage en elev der ikke er tilknyttet nogen tutor |```JSON toProfile:"tutor",fromProfile:"user1",command:"take",content:"user1"} ``` |
-
+```
+Vil sende en besked fra joacim@vetterlain.dk til tutor@cphbusiness.dk med indholdet "Hej tutor!"
+- Take
+```javascript 
+{toProfile:"",fromProfile:"tutor",command:"take",content:"user"} 
+```
+Vil tage fat i useren "user" og sætte userens assignedTutor attribut til "tutor" samt fjerne "user" fra notGettingHelp listen
 
 ## How to part:
 #### Set up a system for local development:

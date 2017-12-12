@@ -3,30 +3,12 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
-[Indledning](#indledning)
-
-[Demo](#demo)
-
-[Kommandoer](#kommandoer)
-
-[Firebase](#firebase)
-
-[Logging](#logging)
-
-[How to alt](#how-to-part)
-
-[Tomcat](#tomcat)
-
-[MySQL](#mysql)
-
-[Getting the code / Local development](#local-development)
-
-[Deploying to server](#deploy-til-server)
-
-[Nginx opsætning](#proxy-nginx)
-
-[Domæne](#domæne)
-
+[Indledning](#indledning)  [Demo](#demo)
+[Kommandoer](#kommandoer)  [Firebase](#firebase)
+[Logging](#logging)  [How to alt](#how-to-part)
+[Tomcat](#tomcat)  [MySQL](#mysql)
+[Getting the code / Local development](#local-development)  [Deploying to server](#deploy-til-server)
+[Nginx opsætning](#proxy-nginx)  [Domæne](#domæne)
 [Sikring af SSH](#ssh-ved-hjælp-af-keys)
 
 ## Indledning

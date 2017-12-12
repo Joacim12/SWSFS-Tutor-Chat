@@ -62,8 +62,6 @@ npm-debug.*
 /backend/FridgeBook/target/
 jspm_packages/
 frontend/node_modules/*
-backend/generated-sources/*
-backend/target/*
 
 # Typescript v1 declaration files
 typings/
@@ -77,7 +75,7 @@ typings/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'npm pack'
+# Output of 'npm pack'ex
 *.tgz
 
 # Yarn Integrity file
@@ -93,6 +91,7 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+target/
 
 ### VisualStudioCode ###
 .vscode/*

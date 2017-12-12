@@ -5,7 +5,7 @@
 
 [Ready, set, GO!](#ready-set-go)
 
-#ready-set-go
+
 
 ##Indhold:
 (#Indledning)
@@ -275,3 +275,4 @@ UsePAM no
 ```
 - Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
 eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```
+# ready-set-go

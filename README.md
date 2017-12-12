@@ -13,6 +13,8 @@
 
 [Logging](#logging) 
 
+[Forslag til manglende features](#forslag-til-features)
+
 [How to alt](#how-to-part)
 
 [Tomcat](#tomcat) 
@@ -190,6 +192,19 @@ Den kan findes her: ``` /opt/tomcat/logs/catalina.out```
 - Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
 Den kan findes her: https://cphbusiness.tk/debug
 
+## Forslag til flere features
+- Statistik
+- Debugger kunne godt bruge flere funktioner, fx hente specifikke chat logs, se meddelelser sendt fra serveren, antal brugere logget ind osv.
+- Admin/manager del, hvor man kan redigere brugere osv.
+- Diverse error handling
+- Lyd virker ikke ordenligt (loader ikke nogle gange)
+- Se om der er nogle tutorer online
+- Tests!
+- Sikre frontenden.
+- Settings i frontenden.
+- Bedre support i edge/safari
+- droppe mysql database og bruge firebase.
+- En app?
 
 ## How to part:
 #### Set up a system for local development:

@@ -7,7 +7,7 @@
 
 [Tomcat](##TOMCAT)
 
-[MySQL](#MySQL)
+[MySQL](#mysql)
 
 [Getting the code](#Get)
 

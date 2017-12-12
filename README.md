@@ -13,7 +13,11 @@
 
 [Deploying to server](#deploy-til-server)
 
-[](#)
+[Nginx opsætning](#proxy-nginx)
+
+[Domæne](#domæne)
+
+[Sikring af SSH](#ssh-ved-hjælp-af-keys)
 
 ## How to part:
 #### Set up a system for local development:

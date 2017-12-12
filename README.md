@@ -183,11 +183,11 @@ key'en der bliver brugt her, kan findes her: https://console.firebase.google.com
 
 ## Logging
 Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:
-nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
+- nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
 Den kan findes her: ``` /var/log/nginx/acces.log ```
-Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
+- Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
 Den kan findes her: ``` /opt/tomcat/logs/catalina.out```
-Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
+- Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
 Den kan findes her: https://cphbusiness.tk/debug
 
 

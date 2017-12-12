@@ -138,15 +138,47 @@ tryk ctrl +x for at gemme.
 - skriv kommando: sudo service tomcat restart, du kan nu ikke længere tilgå tomcat via port 8080
 #### Opsætning af nginx 
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default
-- Start med at tilføje følgende upstream blok:
-```
+Jeg har lavet følgende konfigurations fil der sørger for det hele, med kommentarer :) 
+```Shell
+# TutorChat NGINX Conf
+
+
+# Tomcat serverens adresse
 upstream tomcat{
   server 127.0.0.1:8080 fail_timeout=0;
 }
-```
-- for at viderstille websocketen tilføj følgende inde i din serverblok:
-```
-location /chat/ {
+
+# Viderstil alt trafik til https
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name cphbusiness.tk www.cphbusiness.tk;
+        return 301 https://cphbusiness.tk$request_uri;
+}
+
+
+# SSL Konfiguration
+server{
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
+
+        include snippets/ssl-cphbusiness.tk.conf;
+        include snippets/ssl-params.conf;
+
+        root /var/www/html;
+
+        index index.html;
+
+        server_name cphbusiness.tk www.cphbusiness.tk;
+
+
+        # Standard lokation
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        # /Chat/ viderstiller/opgraderer websockets til tomcat serveren
+        location /chat/ {
                 include proxy_params;
                 proxy_pass http://tomcat/chat/;
                 proxy_http_version 1.1;
@@ -156,16 +188,17 @@ location /chat/ {
 
         }
 
-```
-- for at stadig kunne tilgå tomcat's manager tilføj følgende til server blokken:
-```
-location /manager/ {
+
+        # Giver os adgang til tomcats manager interface
+        location /manager/ {
                 include proxy_params;
                 proxy_pass http://tomcat/manager/;
         }
+}
 
 ```
-
+- Som det ses i Java backenden understøtter vi at sende filer op til 25mb, 
+skriv ```sudo nano /etc/nginx/nginx.conf``` og tilføj linjen ``` client_max_body_size 25M; ``` under http blokken.
 
 
 #### Domæne

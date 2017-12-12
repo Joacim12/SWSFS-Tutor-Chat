@@ -62,6 +62,8 @@ npm-debug.*
 /backend/FridgeBook/target/
 jspm_packages/
 frontend/node_modules/*
+backend/generated-sources/*
+backend/target/*
 
 # Typescript v1 declaration files
 typings/

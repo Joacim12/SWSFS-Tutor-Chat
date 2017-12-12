@@ -26,7 +26,7 @@ public class PushNotifier {
             JsonObject notification = new JsonObject();
             notification.addProperty("title", "TutorChat");
             notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
-//            notification.addProperty("icon", URL + " LINK TO IMAGE"); // no images on server currently
+            notification.addProperty("icon", "https://www.vulgaris-medical.com/sites/default/files/styles/big-lightbox/public/field/image/actualites/2016/02/12/le-chat-source-de-bienfaits-pour-votre-sante.jpg"); // no images on server currently
             notification.addProperty("click_action", URL);
             j.add("notification", notification);
             StringEntity stringEntity = new StringEntity(j.toString());

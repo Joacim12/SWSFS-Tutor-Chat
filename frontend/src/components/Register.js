@@ -3,8 +3,12 @@ import {Link} from 'react-router-dom'
 import Navbar from "./Navbar";
 import firebase from "../js/firebase.js";
 
+// our websocket URL, can be changed from package.json
 const webSocket = require("../../package.json").webSocket;
 
+/**
+ * Component responsible for registering new users.
+ */
 class Register extends Component {
 
     state = {
@@ -20,9 +24,8 @@ class Register extends Component {
         this.setState({connection: connection});
     }
 
-
     /**
-     * Register user in firebase, and send a message to my database, with the newly created user, so we can store the
+     * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
      * username there aswell.
      */
     register = () => {
@@ -30,18 +33,22 @@ class Register extends Component {
             "command": "createUser",
             "content": this.state.email
         }
+
         firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
             .then(() => {
                 this.state.connection.send(JSON.stringify(profile));
-                this.setState({success: true})
+                this.setState({error:"",success: true})
             })
             .catch(error => {
                 this.setState({error})
             });
     }
 
-
-    renderError() {
+    /**
+     *
+     * @returns an visible error to the user, i.e: 'Username already exists!*
+     */
+    renderError = () => {
         if (this.state.error.code !== undefined) {
             return (
                 <div className="alert alert-danger">
@@ -52,6 +59,10 @@ class Register extends Component {
         }
     }
 
+    /**
+     *
+     * @returns a green box with user created!
+     */
     renderSuccess() {
         if (this.state.success) {
             return (
@@ -62,18 +73,32 @@ class Register extends Component {
         }
     }
 
+    /**
+     * This method handles updating the relevant attribute in state
+     * @param event is an object which should have a target.name and a target.value
+     * i.e 'email':'example@example.com'
+     */
     handleInput = (event) => {
         this.setState({
             [event.target.name]: event.target.value
         })
     }
 
+    /**
+     * Handles key press, currently only 'Enter', when Enter is pressed, the register() method will be called.
+     * @param e is the object that has the key pressed in.
+     */
     handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             this.register();
         }
     }
 
+
+    /**
+     * default RxJs render loop.
+     * @returns the rendered page.
+     */
     render() {
         return (
             <div>

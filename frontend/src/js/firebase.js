@@ -27,7 +27,8 @@ export function isLoggedIn(){
     return firebase.auth().currentUser;
 }
 
-//
+
+// Dette kan sætte diverse uservariabler fra firebase hvis det ønskes.
 // firebase.auth().onAuthStateChanged(function(user) {
 //     if (user) {
 //         // User is signed in.

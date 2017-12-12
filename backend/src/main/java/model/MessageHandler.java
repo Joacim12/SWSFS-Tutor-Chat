@@ -104,19 +104,19 @@ public class MessageHandler {
             m.setToProfile(message.getFromProfile());
             findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
         } else if (message.getCommand().equals("take")) {
-            Profile u = findUser(message.getContent().split(":")[0]);
-            for (Message message1 : NOTGETTINGHELP.get(u)) {
+            Profile profile = findUser(message.getContent().split(":")[0]);
+            for (Message message1 : NOTGETTINGHELP.get(profile)) {
                 findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
             }
-            NOTGETTINGHELP.remove(u);
+            NOTGETTINGHELP.remove(profile);
             ONLINEPROFILES.forEach(user -> {
-                if (user.getUsername().equals(u.getUsername())) {
+                if (user.getUsername().equals(profile.getUsername())) {
                     user.setAssignedTutor(message.getFromProfile());
                 }
             });
             handleMessage(getNeedHelp());
             getConnectedToTutor();
-            handleMessage(setTutor(message, u));
+            handleMessage(setTutor(message, profile));
         } else if (message.getCommand().equals(("setTutor"))) {
             for (Profile user : ONLINEPROFILES) {
                 if (user.getUsername().equals(message.getToProfile())) {

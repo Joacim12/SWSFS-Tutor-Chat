@@ -37,7 +37,7 @@ public class ChatControl {
             return;
         } else {
             for (Profile user : mh.getUserFacade().getProfiles()) {
-                if (user.getUsername().equals(param)) { // password?
+                if (user.getUsername().equals(param)) { 
                     mh.addUser(session, user);
                 }
             }

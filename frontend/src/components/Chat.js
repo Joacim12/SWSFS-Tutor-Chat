@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import beep from "../resources/beep.wav"
 import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
-import * as firebase from "firebase";
+import * as firebase from "firebase"
 
 const webSocket = require("../../package.json").webSocket;
 
@@ -28,13 +28,9 @@ class Chat extends Component {
 
     componentDidMount() {
         let connection = new WebSocket(webSocket + this.state.username);
-        this.setState({
-            connection: connection,
-        }, () => {
-            connection.onmessage = this.handleMessage;
-        }, () => {
-            this.initFirebase()
-        })
+        this.setState({connection: connection},
+            () => {connection.onmessage = this.handleMessage;},
+            this.requestWebNotificationPermission())
     }
 
     componentDidUpdate() {
@@ -45,7 +41,7 @@ class Chat extends Component {
         }
     }
 
-    initFirebase = () => {
+    requestWebNotificationPermission = () => {
         const messaging = firebase.messaging();
         messaging.requestPermission()
             .then(() => {
@@ -59,7 +55,7 @@ class Chat extends Component {
                     this.state.connection.send(msg);
                 })
             }).catch((err) => {
-            console.log(err)
+            console.log(err) //No error handling :(
         })
     }
 

@@ -25,15 +25,37 @@ public class MessageHandler {
     private final UserFacade USERFACADE = new UserFacade("PU");
     private final PushNotifier pushNotifier = new PushNotifier();
 
+    public void handleMessage(Message message) throws IOException, EncodeException {
+        switch (message.getCommand()) {
+            case "message":
+                sendMessage(message);
+                break;
+            case "webNoti":
+                sendWebNotiMessage(message);
+                break;
+            case "file":
+                sendFileMessage(message);
+                break;
+            case "take":
+                sendTakeMessage(message);
+            case "setTutor":
+                sendSetTutorMessage(message);
+            case "connectedUsers":
+                findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
+            case "release":
+                sendReleaseMessage(message);
+            case "needHelp":
+                sendNeedHelpMessage(message);
+        }
+    }
+
     public void addUser(Session session, Profile dbUser) throws EncodeException, IOException {
         dbUser.setSession(session);
         ONLINEPROFILES.add(dbUser);
-
         // Sending previous messages to user, should probably send them as list
         for (Message message : dbUser.getMessages()) {
             dbUser.getSession().getBasicRemote().sendObject(message);
         }
-
         // Sending a notification to users that has accepted receiving web notification about a new tutor has come online
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
@@ -42,24 +64,19 @@ public class MessageHandler {
                 }
             });
         }
-
         // Sending a message to tutors if there are any students that has requested help
         handleMessage(getNeedHelp());
-
     }
 
-    
     //Removing user from the lists it's in, and broadcasting the new lists
     public void disconnectHandler(Session session) throws EncodeException, IOException {
         for (Profile profile : ONLINEPROFILES) {
-            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(findUser(session).getUsername())) { 
-                System.out.println(profile);
+            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(findUser(session).getUsername())) {
                 profile.setAssignedTutor(null);
                 NOTGETTINGHELP.put(profile, profile.getMessages());
                 profile.getSession().getBasicRemote().sendObject(removeTutor(profile.getUsername()));
             }
         }
-        System.out.println(NOTGETTINGHELP.size());
         NOTGETTINGHELP.remove(findUser(session));
         ONLINEPROFILES.remove(findUser(session));
         handleMessage(getNeedHelp());
@@ -70,16 +87,8 @@ public class MessageHandler {
         findUser(s).setBuf(buf);
     }
 
-    
-    /**
-     * 
-     * @param message
-     * @throws EncodeException
-     * @throws IOException 
-     * TODO: ADD COMMENTS :D
-     */
-    public void handleMessage(Message message) throws EncodeException, IOException {
-        if (message.getCommand().equals("message") && message.getToProfile() != null) {
+    private void sendMessage(Message message) throws IOException, EncodeException {
+        if (message.getToProfile() != null) {
             for (Profile user : ONLINEPROFILES) {
                 if (user.getUsername().equals(message.getToProfile()) || user.getUsername().equals(message.getFromProfile())) {
                     Profile p = USERFACADE.getProfileById(user.getUsername());
@@ -88,11 +97,17 @@ public class MessageHandler {
                     user.getSession().getBasicRemote().sendObject(message);
                 }
             }
-        } else if (message.getCommand().equals("webNoti")) {
-            Profile p = USERFACADE.getProfileById(message.getFromProfile());
-            p.setToken(message.getContent());
-            USERFACADE.updateProfile(p);
-        } else if (message.getCommand().equals("file") && message.getToProfile() != null) {
+        }
+    }
+
+    private void sendWebNotiMessage(Message message) {
+        Profile p = USERFACADE.getProfileById(message.getFromProfile());
+        p.setToken(message.getContent());
+        USERFACADE.updateProfile(p);
+    }
+
+    private void sendFileMessage(Message message) throws IOException, EncodeException {
+        if (message.getToProfile() != null) {
             Message m = new Message();
             m.setToProfile(message.getToProfile());
             m.setFromProfile(message.getFromProfile());
@@ -103,50 +118,56 @@ public class MessageHandler {
             findUser(message.getFromProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFromProfile()).getBuf()));
             m.setToProfile(message.getFromProfile());
             findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
-        } else if (message.getCommand().equals("take")) {
-            Profile profile = findUser(message.getContent().split(":")[0]);
-            for (Message message1 : NOTGETTINGHELP.get(profile)) {
-                findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
+        }
+    }
+
+    private void sendSetTutorMessage(Message message) throws  IOException, EncodeException {
+        for (Profile user : ONLINEPROFILES) {
+            if (user.getUsername().equals(message.getToProfile())) {
+                user.getSession().getBasicRemote().sendObject(message);
             }
-            NOTGETTINGHELP.remove(profile);
-            ONLINEPROFILES.forEach(user -> {
-                if (user.getUsername().equals(profile.getUsername())) {
-                    user.setAssignedTutor(message.getFromProfile());
-                }
-            });
-            handleMessage(getNeedHelp());
-            getConnectedToTutor();
-            handleMessage(setTutor(message, profile));
-        } else if (message.getCommand().equals(("setTutor"))) {
-            for (Profile user : ONLINEPROFILES) {
-                if (user.getUsername().equals(message.getToProfile())) {
-                    user.getSession().getBasicRemote().sendObject(message);
-                }
+        }
+    }
+
+    private void sendTakeMessage(Message message) throws IOException, EncodeException {
+        Profile profile = findUser(message.getContent().split(":")[0]);
+        for (Message message1 : NOTGETTINGHELP.get(profile)) {
+            findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
+        }
+        NOTGETTINGHELP.remove(profile);
+        ONLINEPROFILES.forEach(user -> {
+            if (user.getUsername().equals(profile.getUsername())) {
+                user.setAssignedTutor(message.getFromProfile());
             }
-        } else if (message.getCommand().equals("connectedUsers")) {
-            findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
-        } else if (message.getCommand().equals("release")) {
-            Profile user = findUser(message.getContent());
-            user.setAssignedTutor("");
-            updateUser(user);
-            handleMessage(removeTutor(user.getUsername()));
-            NOTGETTINGHELP.put(user, new ArrayList());
-            Message m = new Message();
-            m.setContent(message.getFromProfile() + " couldn't resolve issue");
-            NOTGETTINGHELP.get(user).add(m);
-            getConnectedToTutor();
-            handleMessage(getNeedHelp());
-        } else if (message.getCommand().equals("needHelp")) {
-            if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).isTutor()) {
-                NOTGETTINGHELP.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
-                NOTGETTINGHELP.get(findUser(message.getFromProfile())).add(message);
-                message.setToProfile(message.getFromProfile());
-                message.setCommand("message");
-                handleMessage(message);
-            }
-            for (Profile tutor : getTutors()) {
-                tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
-            }
+        });
+        handleMessage(getNeedHelp());
+        getConnectedToTutor();
+        handleMessage(setTutor(message, profile));
+    }
+
+    private void sendReleaseMessage(Message message) throws EncodeException, IOException {
+        Profile user = findUser(message.getContent());
+        user.setAssignedTutor("");
+        updateUser(user);
+        handleMessage(removeTutor(user.getUsername()));
+        NOTGETTINGHELP.put(user, new ArrayList());
+        Message m = new Message();
+        m.setContent(message.getFromProfile() + " couldn't resolve issue");
+        NOTGETTINGHELP.get(user).add(m);
+        getConnectedToTutor();
+        handleMessage(getNeedHelp());
+    }
+
+    private void sendNeedHelpMessage(Message message) throws EncodeException, IOException {
+        if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).isTutor()) {
+            NOTGETTINGHELP.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
+            NOTGETTINGHELP.get(findUser(message.getFromProfile())).add(message);
+            message.setToProfile(message.getFromProfile());
+            message.setCommand("message");
+            handleMessage(message);
+        }
+        for (Profile tutor : getTutors()) {
+            tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
         }
     }
 

@@ -52,7 +52,11 @@ Her er de forskellige kommandoer:
 
 | Kommando | beskrivelse | eksempel |
 | --- | --- | --- |
-| message | brugt til at sende beskeder | ```javascript {toProfile:"user",fromProfile:"user1",command:"message",content:"hej"} ``` |
+| message | brugt til at sende beskeder | 
+```javascript 
+{toProfile:"user",fromProfile:"user1",command:"message",content:"hej"} 
+``` 
+|
 | take | bruges til tage en elev der ikke er tilknyttet nogen tutor |```JSON toProfile:"tutor",fromProfile:"user1",command:"take",content:"user1"} ``` |
 
 

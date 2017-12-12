@@ -40,14 +40,20 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 | --- | --- | --- | --- |
 | Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
 
+Eksempel:
 
+| toProfile | fromProfile | command | content |
+| --- | --- | --- | --- |
+| tutor@cphbusiness.tk | joacim@vetterlain.dk | message | Hej tutor! |
 
-Her er chat protokollen som der ser ud lige nu:
+Ville sende en besked fra joacim@vetterlain.dk til tutor@cphbusiness.dk med indholdet "Hej tutor!"
 
-| Kommando | beskrivelse |
-| --- | --- |
-| message | brugt til at sende beskeder |
-| take | bruges til tage en elev der ikke er tilknyttet nogen tutor |
+Her er de forskellige kommandoer:
+
+| Kommando | beskrivelse | eksempel |
+| --- | --- | --- |
+| message | brugt til at sende beskeder | ```json {toProfile:"user",fromProfile:"user1",command:"message",content:"hej"} ``` |
+| take | bruges til tage en elev der ikke er tilknyttet nogen tutor |```json toProfile:"tutor",fromProfile:"user1",command:"take",content:"user1"} ``` |
 
 
 ## How to part:

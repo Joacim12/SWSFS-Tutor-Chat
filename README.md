@@ -5,6 +5,8 @@
 
 [Indledning](#indledning)
 
+[Kommandoer](#kommandoer)
+
 [How to alt](#how-to-part)
 
 [Tomcat](#tomcat)
@@ -40,7 +42,7 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 | --- | --- | --- | --- |
 | Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
 
-Eksempeler på beskeder til server:
+## Kommandoer
 
 - needHelp
 ```javascript 

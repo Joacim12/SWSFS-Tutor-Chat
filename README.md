@@ -7,10 +7,10 @@
 #### Set up a system for local development:
 
 ## TOMCAT
-Jeg bruger en raspberry pi, der kører debian 8 som server(Ville nok anbefale at købe en server ved digitalocean.com med ubuntu)
- log ind på din server vha ```-ssh brugernavn@ipadresse```
- sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
- installer java: ```sudo apt-get install default-jdk```
+Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
+ - log ind på din server vha ```-ssh brugernavn@ipadresse```
+ - sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
+ - installer java: ```sudo apt-get install default-jdk```
  #### lav en tomcatuser:
  - skriv kommando: sudo groupadd tomcat
  - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat

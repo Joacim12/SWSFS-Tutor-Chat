@@ -5,17 +5,23 @@
 
 [Indledning](#indledning)
 
-[Kommandoer](#kommandoer)
+[Demo](#demo)
+
+[Kommandoer](#kommandoer)  
 
 [Firebase](#firebase)
 
+[Logging](#logging) 
+
+[Forslag til manglende features](#forslag-til-features)
+
 [How to alt](#how-to-part)
 
-[Tomcat](#tomcat)
+[Tomcat](#tomcat) 
 
 [MySQL](#mysql)
 
-[Getting the code / Local development](#local-development)
+[Getting the code / Local development](#local-development) 
 
 [Deploying to server](#deploy-til-server)
 
@@ -43,6 +49,11 @@ Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 | toProfile | fromProfile | command | content |
 | --- | --- | --- | --- |
 | Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+
+## Demo
+Åben https://cphbusiness.tk og log ind med demo@demo.dk // demo1234 skriv en besked og se den blive sendt til dig selv! åben evt en fane mere og login med tutor@cphbusiness.tk // tutor12 og se at du kan vælge demo@demo.dk og skrive/sende filer frem og tilbage + du får en push notifikation når tutor logger ind(Hvis du tillader meddelelser)
+
+Hvis du åbner https://cphbusiness.tk/debug kan du også her se beskeder fra begge, samt hvem der er forbundet p.t
 
 ## Kommandoer
 
@@ -92,6 +103,9 @@ I frontenden samt backenden bliver firebase brugt.
 I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
 Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
 
+I firebase konsollen skal authentication lige slåes til, det vælges ved at trykke på authenticaton og start using authentication.
+
+
 I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
 ```javascript
   /**
@@ -115,6 +129,8 @@ I Register.js importeres firebase.js filen ```javascript    import firebase from
     }
 ```
 
+
+
 i Chat.js bruges den til at sætte en webNotifikation op: 
 ```javascript
  requestWebNotificationPermission = () => {
@@ -136,6 +152,59 @@ i Chat.js bruges den til at sætte en webNotifikation op:
     }
 ```
 For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
+
+- Backend
+I backenden bruges det til at sende push notifikationerne til de brugere der har tilladt det, det gøres i PushNotifier klassen, her har jeg implementeret en http klient der sender en post til firebase's server med et objekt der indeholder data til den notifikation jeg vil sende, det ser således ud:
+
+```java 
+public void sendTutorNotification(String token, String to,String tutor) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("https://fcm.googleapis.com/fcm/send");
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", "key=AAAAdJe6NHg:APA91bGtqcE4d0Tpt8yZxdfA30wR7vsvUAHlO4IFJ6C1_UhU1WR-ToW_dOX5gdZPDYSSctWmA3YgYsUJNjEHLEUZ53zDS1qGHkRuiIpQ3mReeFK8nczo9ePDJDpaTxOd-3DVuR5bI1zZ");
+        try {
+            JsonObject j = new JsonObject();
+            j.addProperty("to", token);
+            JsonObject notification = new JsonObject();
+            notification.addProperty("title", "TutorChat");
+            notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
+            notification.addProperty("icon", "https://www.vulgaris-medical.com/sites/default/files/styles/big-lightbox/public/field/image/actualites/2016/02/12/le-chat-source-de-bienfaits-pour-votre-sante.jpg"); 
+            notification.addProperty("click_action", URL);
+            j.add("notification", notification);
+            StringEntity stringEntity = new StringEntity(j.toString());
+            httpPost.getRequestLine();
+            httpPost.setEntity(stringEntity);
+            httpClient.execute(httpPost);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+```
+key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
+
+## Logging
+Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:
+- nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
+Den kan findes her: ``` /var/log/nginx/acces.log ```
+- Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
+Den kan findes her: ``` /opt/tomcat/logs/catalina.out```
+- Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
+Den kan findes her: https://cphbusiness.tk/debug
+
+## Forslag til flere features
+- Statistik
+- Debugger kunne godt bruge flere funktioner, fx hente specifikke chat logs, se meddelelser sendt fra serveren, antal brugere logget ind osv.
+- Admin/manager del, hvor man kan redigere brugere osv.
+- Diverse error handling
+- Lyd virker ikke ordenligt (loader ikke nogle gange)
+- Se om der er nogle tutorer online
+- Tests!
+- Sikre frontenden.
+- Settings i frontenden.
+- Bedre support i edge/safari
+- droppe mysql database og bruge firebase.
+- En app?
 
 ## How to part:
 #### Set up a system for local development:

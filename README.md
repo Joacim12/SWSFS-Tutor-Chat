@@ -3,12 +3,16 @@
 [![Build Status](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat.svg?branch=master)](https://travis-ci.org/Joacim12/SWSFS-Tutor-Chat)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/Joacim12/SWSFS-Tutor-Chat.svg?columns=all)](https://waffle.io/Joacim12/SWSFS-Tutor-Chat)
 
+[Ready, set, GO!](#ready-set-go)
+
+#ready-set-go
+
 ##Indhold:
 (#Indledning)
 
 ## How to part:
 #### Set up a system for local development:
-[](#indledning)
+
 Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
 sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
 skriv ```adduser tutorchat```

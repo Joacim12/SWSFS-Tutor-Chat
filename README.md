@@ -40,10 +40,10 @@ Her er chat protokollen som der ser ud lige nu:
 | Message  | Sender en besked | a|
 | Content Cell  | Content Cell  | a |
 
-| Command | Description |
+| Kommando | Beskrivelse |
 | --- | --- |
-| git status | List all new or modified files |
-| git diff | Show file differences that haven't been staged |
+| message | brugt til at sende beskeder |
+| take | bruges til tage en elev der ikke er tilknyttet nogen tutor |
 
 
 ## How to part:

@@ -32,7 +32,7 @@ Hvis man kalder serveren på 127.0.0.1/chat/debug bliver der registreret en debg
 
 Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
 
-Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere.
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
 
 Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 
@@ -44,19 +44,38 @@ Eksempeler på beskeder til server:
 
 - needHelp
 ```javascript 
-{toProfile:"",fromProfile:"brugernavn",command:"needHelp",content:"hej"} 
+{"fromProfile":"brugernavn","command":"needHelp","content":"hej"} 
 ```
 Bliver brugt når en bruger logger ind, for at tilføje ham til listen over brugere der ikke får hjælp lige nu, samt sender en besked retur til brugeren hvor der står "hej"
 - Message
 ```javascript 
-{toProfile:"user",fromProfile:"user1",command:"message",content:"hej"} 
+{"toProfile":"user","fromProfile":"user1","command":"message","content":"hej"} 
 ```
 Vil sende en besked fra joacim@vetterlain.dk til tutor@cphbusiness.dk med indholdet "Hej tutor!"
 - Take
 ```javascript 
-{toProfile:"",fromProfile:"tutor",command:"take",content:"user"} 
+{"fromProfile":"tutor","command":"take","content":"user"} 
 ```
 Vil tage fat i useren "user" og sætte userens assignedTutor attribut til "tutor" samt fjerne "user" fra notGettingHelp listen
+```javascript 
+{"fromProfile":"user","command":"webNoti","content":"1782489uajhdfkuah389fha9u3agknfdg"} 
+```
+- webNoti
+Hvis brugeren siger ja til at modtage beskeder fra siden, bliver denne besked sendt til serveren med brugerens web notifikations token, og token bliver tilknyttet brugeren i databasen, så vi kan sende push notifikationer til brugerens browser/telefon
+```javascript 
+{"fromProfile":"user","command":"webNoti","content":"1782489uajhdfkuah389fha9u3agknfdg"} 
+```
+- file
+```javascript 
+{"fromProfile":"user","toProfile":"tutor","command":"file","content":"fil.jpg"} 
+```
+Vil sende filen "fil.jpg" fra "user" til "tutor", max filstørrelse 25mb.
+
+- setTutor
+```javascript 
+{"fromProfile":"Server","toProfile":"user","command":"setTutor","content":"tutor"} 
+```
+Vil blive send til "user" og i frontenden vil brugerens send til blive sat til "tutor"
 
 ## How to part:
 #### Set up a system for local development:

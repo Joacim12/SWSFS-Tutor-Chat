@@ -11,6 +11,10 @@
 
 [Getting the code / Local development](#local-development)
 
+[Deploying to server](#deploy-til-server)
+
+[](#)
+
 ## How to part:
 #### Set up a system for local development:
 
@@ -139,8 +143,8 @@ tryk ctrl +x for at gemme.
 - Find ROOT.war filen i din target mappe, og deploy den.
 - Systemet kan nu tilgås på 192:168.0.103:8080 !!
 
-## SSL / Proxy / Domæne (Optionel)
-#### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx, samt erhverve et domæne.
+## Proxy nginx
+#### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx
 - Skriv kommando: sudo apt-get install nginx
 - Hvis du åbner ipen på din server vil du nu se en nginx side.
 #### Viderstil websockets, og request mod manager til tomcat
@@ -212,10 +216,10 @@ server{
 skriv ```sudo nano /etc/nginx/nginx.conf``` og tilføj linjen ``` client_max_body_size 25M; ``` under http blokken.
 
 
-#### Domæne
+## Domæne
 Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domænet var gratis på dot.tk
 
-#### ssl certifikat
+#### SSL Certifikat
 Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
 Først lad os tilføje domæne navnene til vores nginx config fil.
 - Skriv kommando: sudo nano /etc/nginx/sites-available/default

@@ -34,11 +34,13 @@ Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en bes
 
 Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere.
 
+Det hele er bygget op omkring en Message klasse, den har følgende attributter:
+| toProfile | fromProfile | command | content 
+| --- | --- | --- | --- |
+| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+
+
 Her er chat protokollen som der ser ud lige nu:
-| Kommando  | Formål | Protokol |
-|---|---|---|
-| Message  | Sender en besked | a|
-| Content Cell  | Content Cell  | a |
 
 | Kommando | Beskrivelse |
 | --- | --- |

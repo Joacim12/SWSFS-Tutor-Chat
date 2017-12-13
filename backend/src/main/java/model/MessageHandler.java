@@ -15,7 +15,9 @@ import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
- * This class is mainly responsible for getting the message to the correct receiver
+ * This class is mainly responsible for getting the message to the correct
+ * receiver
+ *
  * @author joacim
  */
 public class MessageHandler {
@@ -25,10 +27,10 @@ public class MessageHandler {
     private final UserFacade USERFACADE = new UserFacade("PU");
     private final PushNotifier pushNotifier = new PushNotifier();
 
-    
     /**
-     * Will delegate the message to the relevant method, based on the messages 
+     * Will delegate the message to the relevant method, based on the messages
      * command attribute.
+     *
      * @param message the message with the command
      */
     public void handleMessage(Message message) throws IOException, EncodeException {
@@ -44,26 +46,35 @@ public class MessageHandler {
                 break;
             case "take":
                 sendTakeMessage(message);
+                break;
             case "setTutor":
                 sendSetTutorMessage(message);
+                break;
             case "connectedUsers":
                 MessageHandler.this.getUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
+                break;
             case "release":
                 sendReleaseMessage(message);
+                break;
             case "needHelp":
                 sendNeedHelpMessage(message);
+                break;
+            default:
+                System.out.println("something went wrong" + message);
+                break;
         }
     }
 
-    
     /**
-     * Will take in a user and add him to the ONLINEPROFILES list.
-     * Followed by sending a needHelp message to all tutors.
-     * If the user is a tutor, there will be sent a notification to all users with a token,
-     * except the user itself that the tutor has come online.
-     * @param dbUser is the user that should be added to the list of online profiles
+     * Will take in a user and add him to the ONLINEPROFILES list. Followed by
+     * sending a needHelp message to all tutors. If the user is a tutor, there
+     * will be sent a notification to all users with a token, except the user
+     * itself that the tutor has come online.
+     *
+     * @param dbUser is the user that should be added to the list of online
+     * profiles
      */
-    public void addUser( Profile dbUser) throws EncodeException, IOException {
+    public void addUser(Profile dbUser) throws EncodeException, IOException {
         ONLINEPROFILES.add(dbUser);
         // Would be smarter sending the whole list.
         for (Message message : dbUser.getMessages()) {
@@ -80,8 +91,10 @@ public class MessageHandler {
     }
 
     /**
-     * Finds the user based on the session, and removes the user from ONLINEPROFILES,
-     * and NOTGETTINGHELP, followed by sending an update message to tutors with the new list.
+     * Finds the user based on the session, and removes the user from
+     * ONLINEPROFILES, and NOTGETTINGHELP, followed by sending an update message
+     * to tutors with the new list.
+     *
      * @param session the user session we want to remove from our system
      */
     public void disconnectHandler(Session session) throws EncodeException, IOException {
@@ -98,12 +111,8 @@ public class MessageHandler {
         getConnectedToTutor();
     }
 
-    
-    
     //  The following classes takes in a Message object, and does what the method
     //  is called.
-     
-    
     private void sendMessage(Message message) throws IOException, EncodeException {
         if (message.getToProfile() != null) {
             for (Profile user : ONLINEPROFILES) {
@@ -138,7 +147,7 @@ public class MessageHandler {
         }
     }
 
-    private void sendSetTutorMessage(Message message) throws  IOException, EncodeException {
+    private void sendSetTutorMessage(Message message) throws IOException, EncodeException {
         for (Profile user : ONLINEPROFILES) {
             if (user.getUsername().equals(message.getToProfile())) {
                 user.getSession().getBasicRemote().sendObject(message);
@@ -163,7 +172,7 @@ public class MessageHandler {
     }
 
     private void sendReleaseMessage(Message message) throws EncodeException, IOException {
-        Profile user = MessageHandler.this.getUser(message.getContent());
+        Profile user = getUser(message.getContent());
         user.setAssignedTutor("");
         updateUser(user);
         handleMessage(removeTutor(user.getUsername()));
@@ -187,9 +196,8 @@ public class MessageHandler {
             tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
         }
     }
-    
-    // From here everything is more or less getters and setters
 
+    // From here everything is more or less getters and setters
     private Message setTutor(Message message, Profile u) {
         Message m = new Message();
         m.setFromProfile("Server");
@@ -253,7 +261,7 @@ public class MessageHandler {
         }
         return updatedUser;
     }
-    
+
     private List<Profile> getTutors() {
         List<Profile> tutore = new ArrayList();
         ONLINEPROFILES.stream().filter((user) -> (user.isTutor())).forEachOrdered((user) -> {
@@ -261,8 +269,6 @@ public class MessageHandler {
         });
         return tutore;
     }
-
-    
 
     private Profile getUser(String username) {
         if (!username.equals("Server")) {

@@ -1,6 +1,5 @@
 package facade;
 
-import entity.Message;
 import entity.Profile;
 import java.util.ArrayList;
 import java.util.List;

@@ -15,8 +15,8 @@ import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
- *
- * @author joaci
+ * This class is mainly responsible for getting the message to the correct receiver
+ * @author joacim
  */
 public class MessageHandler {
 
@@ -25,6 +25,12 @@ public class MessageHandler {
     private final UserFacade USERFACADE = new UserFacade("PU");
     private final PushNotifier pushNotifier = new PushNotifier();
 
+    
+    /**
+     * Will delegate the message to the relevant method, based on the messages 
+     * command attribute.
+     * @param message the message with the command
+     */
     public void handleMessage(Message message) throws IOException, EncodeException {
         switch (message.getCommand()) {
             case "message":
@@ -41,7 +47,7 @@ public class MessageHandler {
             case "setTutor":
                 sendSetTutorMessage(message);
             case "connectedUsers":
-                findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
+                MessageHandler.this.getUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
             case "release":
                 sendReleaseMessage(message);
             case "needHelp":
@@ -49,14 +55,20 @@ public class MessageHandler {
         }
     }
 
-    public void addUser(Session session, Profile dbUser) throws EncodeException, IOException {
-        dbUser.setSession(session);
+    
+    /**
+     * Will take in a user and add him to the ONLINEPROFILES list.
+     * Followed by sending a needHelp message to all tutors.
+     * If the user is a tutor, there will be sent a notification to all users with a token,
+     * except the user itself that the tutor has come online.
+     * @param dbUser is the user that should be added to the list of online profiles
+     */
+    public void addUser( Profile dbUser) throws EncodeException, IOException {
         ONLINEPROFILES.add(dbUser);
-        // Sending previous messages to user, should probably send them as list
+        // Would be smarter sending the whole list.
         for (Message message : dbUser.getMessages()) {
             dbUser.getSession().getBasicRemote().sendObject(message);
         }
-        // Sending a notification to users that has accepted receiving web notification about a new tutor has come online
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
                 if (!profile.equals(dbUser) && profile.getToken() != null) {
@@ -64,29 +76,34 @@ public class MessageHandler {
                 }
             });
         }
-        // Sending a message to tutors if there are any students that has requested help
         handleMessage(getNeedHelp());
     }
 
-    //Removing user from the lists it's in, and broadcasting the new lists
+    /**
+     * Finds the user based on the session, and removes the user from ONLINEPROFILES,
+     * and NOTGETTINGHELP, followed by sending an update message to tutors with the new list.
+     * @param session the user session we want to remove from our system
+     */
     public void disconnectHandler(Session session) throws EncodeException, IOException {
         for (Profile profile : ONLINEPROFILES) {
-            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(findUser(session).getUsername())) {
+            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(getUser(session).getUsername())) {
                 profile.setAssignedTutor(null);
                 NOTGETTINGHELP.put(profile, profile.getMessages());
                 profile.getSession().getBasicRemote().sendObject(removeTutor(profile.getUsername()));
             }
         }
-        NOTGETTINGHELP.remove(findUser(session));
-        ONLINEPROFILES.remove(findUser(session));
+        NOTGETTINGHELP.remove(getUser(session));
+        ONLINEPROFILES.remove(getUser(session));
         handleMessage(getNeedHelp());
         getConnectedToTutor();
     }
 
-    public void sendFile(byte[] buf, Session s) {
-        findUser(s).setBuf(buf);
-    }
-
+    
+    
+    //  The following classes takes in a Message object, and does what the method
+    //  is called.
+     
+    
     private void sendMessage(Message message) throws IOException, EncodeException {
         if (message.getToProfile() != null) {
             for (Profile user : ONLINEPROFILES) {
@@ -113,11 +130,11 @@ public class MessageHandler {
             m.setFromProfile(message.getFromProfile());
             m.setCommand("file");
             m.setContent(message.getContent());
-            findUser(message.getToProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFromProfile()).getBuf()));
-            findUser(message.getToProfile()).getSession().getBasicRemote().sendObject(m);
-            findUser(message.getFromProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(findUser(message.getFromProfile()).getBuf()));
+            MessageHandler.this.getUser(message.getToProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(MessageHandler.this.getUser(message.getFromProfile()).getBuf()));
+            MessageHandler.this.getUser(message.getToProfile()).getSession().getBasicRemote().sendObject(m);
+            MessageHandler.this.getUser(message.getFromProfile()).getSession().getBasicRemote().sendBinary(ByteBuffer.wrap(MessageHandler.this.getUser(message.getFromProfile()).getBuf()));
             m.setToProfile(message.getFromProfile());
-            findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
+            MessageHandler.this.getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(m);
         }
     }
 
@@ -130,9 +147,9 @@ public class MessageHandler {
     }
 
     private void sendTakeMessage(Message message) throws IOException, EncodeException {
-        Profile profile = findUser(message.getContent().split(":")[0]);
+        Profile profile = MessageHandler.this.getUser(message.getContent().split(":")[0]);
         for (Message message1 : NOTGETTINGHELP.get(profile)) {
-            findUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
+            MessageHandler.this.getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message1);
         }
         NOTGETTINGHELP.remove(profile);
         ONLINEPROFILES.forEach(user -> {
@@ -146,7 +163,7 @@ public class MessageHandler {
     }
 
     private void sendReleaseMessage(Message message) throws EncodeException, IOException {
-        Profile user = findUser(message.getContent());
+        Profile user = MessageHandler.this.getUser(message.getContent());
         user.setAssignedTutor("");
         updateUser(user);
         handleMessage(removeTutor(user.getUsername()));
@@ -159,9 +176,9 @@ public class MessageHandler {
     }
 
     private void sendNeedHelpMessage(Message message) throws EncodeException, IOException {
-        if (!message.getFromProfile().equals("Server") && !findUser(message.getFromProfile()).isTutor()) {
-            NOTGETTINGHELP.putIfAbsent(findUser(message.getFromProfile()), new ArrayList());
-            NOTGETTINGHELP.get(findUser(message.getFromProfile())).add(message);
+        if (!message.getFromProfile().equals("Server") && !MessageHandler.this.getUser(message.getFromProfile()).isTutor()) {
+            NOTGETTINGHELP.putIfAbsent(MessageHandler.this.getUser(message.getFromProfile()), new ArrayList());
+            NOTGETTINGHELP.get(MessageHandler.this.getUser(message.getFromProfile())).add(message);
             message.setToProfile(message.getFromProfile());
             message.setCommand("message");
             handleMessage(message);
@@ -170,6 +187,8 @@ public class MessageHandler {
             tutor.getSession().getBasicRemote().sendObject(getNeedHelp());
         }
     }
+    
+    // From here everything is more or less getters and setters
 
     private Message setTutor(Message message, Profile u) {
         Message m = new Message();
@@ -224,14 +243,6 @@ public class MessageHandler {
         }
     }
 
-    private List<Profile> getTutors() {
-        List<Profile> tutore = new ArrayList();
-        ONLINEPROFILES.stream().filter((user) -> (user.isTutor())).forEachOrdered((user) -> {
-            tutore.add(user);
-        });
-        return tutore;
-    }
-
     private Profile updateUser(Profile user) {
         Profile updatedUser = null;
         for (Profile user1 : ONLINEPROFILES) {
@@ -242,8 +253,18 @@ public class MessageHandler {
         }
         return updatedUser;
     }
+    
+    private List<Profile> getTutors() {
+        List<Profile> tutore = new ArrayList();
+        ONLINEPROFILES.stream().filter((user) -> (user.isTutor())).forEachOrdered((user) -> {
+            tutore.add(user);
+        });
+        return tutore;
+    }
 
-    private Profile findUser(String username) {
+    
+
+    private Profile getUser(String username) {
         if (!username.equals("Server")) {
             for (Profile user : ONLINEPROFILES) {
                 if (user.getUsername().equals(username)) {
@@ -254,7 +275,7 @@ public class MessageHandler {
         return null;
     }
 
-    public Profile findUser(Session session) {
+    public Profile getUser(Session session) {
         for (Profile user : ONLINEPROFILES) {
             if (user.getSession().equals(session)) {
                 return user;

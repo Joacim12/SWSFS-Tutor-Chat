@@ -15,7 +15,9 @@ import javax.websocket.*;
 import javax.websocket.server.*;
 
 /**
- *
+ * The websocket server endpoint class, listening on localhost/chat/
+ * Uses three encoders, which will take the Message object or Debug and convert 
+ * it to json.
  * @author jvetterlain
  */
 @ServerEndpoint(value = "/chat/{param}", decoders = MessageDecoder.class, encoders = {MessageEncoder.class, DebugEncoder.class})
@@ -29,6 +31,13 @@ public class ChatControl {
         mh = new MessageHandler();
     }
 
+    /**
+     * When a client opens a connection, this method will be called.
+     * Here we check the path parameter and hanldes that.
+     * @param session used for sending messages to the user.
+     * @param param used for determing if it's a debug session or new register,
+     * or just a user logging in.
+     */
     @OnOpen
     public void onOpen(Session session, @PathParam("param") String param) throws EncodeException, IOException {
         if (param.equals("debug")) {
@@ -37,8 +46,9 @@ public class ChatControl {
             return;
         } else {
             for (Profile user : mh.getUserFacade().getProfiles()) {
-                if (user.getUsername().equals(param)) { 
-                    mh.addUser(session, user);
+                if (user.getUsername().equals(param)) {
+                    user.setSession(session);
+                    mh.addUser(user);
                 }
             }
             if (debug.getSession() != null) {
@@ -49,6 +59,12 @@ public class ChatControl {
         }
     }
 
+    /**
+     * This class is responsible for forwarding files from one client to another.
+     * And will be called if the client send a byte array.
+     * @param is the file coming from the client
+     * @param session the user who sent the files session
+     */
     @OnMessage(maxMessageSize = 25000000) // 25mb
     public void onFileUpload(InputStream is, Session session) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -58,9 +74,17 @@ public class ChatControl {
             buffer.write(data, 0, nRead);
         }
         buffer.flush();
-        mh.sendFile(buffer.toByteArray(), session);
+        mh.getUser(session).setBuf(buffer.toByteArray());
     }
 
+    /**
+     * OnMessage for 'text messages' 
+     * Will take the session and message parameters and either create a user,
+     * send a message to the chatdebugger and send the message,
+     * or just send a message.
+     * @param session contains info about the client who sent the messages info
+     * @param message the message the client wants to send.
+     */
     @OnMessage
     public void onMessage(Session session, Message message) throws EncodeException, IOException {
         if (message.getCommand().equals("createUser")) {
@@ -79,6 +103,11 @@ public class ChatControl {
         }
     }
 
+    
+    /**
+     * Will be called if an error gets thrown, or the user disconnects.
+     * @param session the session that should be removed from our system.
+     */
     @OnClose
     public void onClose(Session session) throws IOException, EncodeException {
         if (!(debug.getSession() != null && debug.getSession().equals(session))) {
@@ -86,6 +115,12 @@ public class ChatControl {
         }
     }
 
+    /**
+     * Will currently just print the throwable, get's called everytime a user disconnects
+     * since the frontend never calls close.
+     * @param session who caused the error.
+     * @param throwable the error
+     */
     @OnError
     public void onError(Session session, Throwable throwable) throws EncodeException, IOException {
         System.out.println(throwable);

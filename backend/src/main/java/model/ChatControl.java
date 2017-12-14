@@ -21,7 +21,8 @@ import javax.websocket.server.*;
  *
  * @author jvetterlain
  */
-@ServerEndpoint(value = "/chat/{param}/{token}", decoders = MessageDecoder.class,
+@ServerEndpoint(value = "/chat/{param}/{token}",
+        decoders = {MessageDecoder.class},
         encoders = {MessageEncoder.class, DebugEncoder.class, ProfileEncoder.class})
 public class ChatControl {
 
@@ -41,10 +42,11 @@ public class ChatControl {
      * @param param used for determing if it's a debug session or new register,
      * or just a user logging in.
      * @param token is used to validate if user is signed into front end.
+     * @param conf the endpoints configuration object.
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("param") String param,
-            @PathParam("token") String token) throws EncodeException, IOException {
+            @PathParam("token") String token, EndpointConfig conf) throws EncodeException, IOException {
         param = param.toLowerCase();
 //        if (param.equals("debug")) {    // IMPORTANT!! outcomment this in production
 //            debug.setSession(session);  // IMPORTANT!! outcomment this in production
@@ -100,6 +102,7 @@ public class ChatControl {
             p.setMessages(new ArrayList());
             p.setUsername(message.getContent()); // should be ok, since firebase only allows ^[0-9a-zA-Z]{27}[0-9]$
             mh.getUserFacade().createProfile(p);
+            return;
         }
         if (debug.getSession() != null) {
             chatDebugger.setCommand("message");
@@ -107,7 +110,7 @@ public class ChatControl {
             debug.getSession().getAsyncRemote().sendObject(chatDebugger);
             mh.handleMessage(message);
         } else {
-                mh.handleMessage(message);
+            mh.handleMessage(message);
         }
     }
 
@@ -132,8 +135,8 @@ public class ChatControl {
      */
     @OnError
     public void onError(Session session, Throwable throwable) throws EncodeException, IOException {
-        System.out.println(throwable);
-//        throwable.printStackTrace();// incomment for seeing full errors
+//        System.out.println(throwable);
+        throwable.printStackTrace();// incomment for seeing full errors
     }
 
 }

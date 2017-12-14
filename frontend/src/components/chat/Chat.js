@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import {Redirect} from 'react-router-dom'
 import UserList from "./UserList";
-import Navbar from "./Navbar";
-import beep from "../resources/beep.wav"
+import Navbar from "../navbar/Navbar";
+import beep from "../../resources/beep.wav"
 import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
-import { isLoggedIn} from "../js/firebase";
-import {closeConnection, getConnection, getUser, setConnection, setUser} from "../js/websocket";
+import { isLoggedIn} from "../../js/firebase";
+import {closeConnection, getConnection, getUser, setConnection, setUser} from "../../js/websocket";
 
 
 class Chat extends Component {
@@ -57,6 +57,7 @@ class Chat extends Component {
                 setUser(message);
                 // We received our user object, let's set loading to false.
                 this.setState({user: message, loading: false})
+                return;
             }
             if (message.command === 'needHelp') {
                 if (message && message.content) {
@@ -157,7 +158,6 @@ class Chat extends Component {
             'content': this.state.message,
         })
         if (this.state.message.length >= 1) {
-            console.log("sending messsage")
             getConnection().send(msg)
         }
     }
@@ -247,7 +247,7 @@ class Chat extends Component {
                     </div>
                     <br/>
                     <input className="btn btn-secondary" type="button" onClick={() => this.sendMessage()}
-                           value='Send message'/>
+                           value='Send message' style={{color:"#a3ecff"}}/>
                 </div>
             </div>
         );

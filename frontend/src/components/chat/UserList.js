@@ -15,7 +15,7 @@ class UserList extends Component {
 
     color = (e) => {
         if (e === this.state.active) {
-            return '#ec99ff';
+            return '#a3ecff';
         }
     }
 
@@ -26,7 +26,7 @@ class UserList extends Component {
     renderUsers = () => {
         let users = this.props.users.map((user, index) => {
             return (
-                <div key={index} id={user} style={{cursor: 'pointer', backgroundColor: this.color(user), border:1}}>
+                <div key={index} id={user} style={{cursor: 'pointer', backgroundColor: this.color(user), border:1, borderRadius:5}}>
                     <i className="material-icons" onClick={this.handleList} id={user}>face</i>
                     <span onClick={this.handleList} id={user}> {user}</span>
                     <i className="material-icons float-right" onClick={this.handleDc} id={user}>exit_to_app</i>

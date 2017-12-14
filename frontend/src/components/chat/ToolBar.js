@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
-import '../css/popup.css'
+import '../../css/popup.css'
 
 
 class SmileyPicker extends Component {
 
 
     state = {
-        smileys: ["😀","😁","😂","💩","😵","🤯","😓","😎"]
+        smileys: ["😀", "😁", "😂", "💩", "😵", "🤯", "😓", "😎"]
     }
 
 
@@ -14,19 +14,21 @@ class SmileyPicker extends Component {
         return this.state.smileys.map((smiley, index) => {
             return (
                 <span key={index}>
-                    <span style={{fontSize:"20px"}} onClick={this.addSmiley}id={smiley}>{smiley}</span>
+                    <span style={{fontSize: "20px"}} onClick={this.addSmiley} id={smiley}>{smiley}</span>
                 </span>
             )
         })
     }
 
-    addSmiley = (e)=>{
+    addSmiley = (e) => {
         document.getElementById("smiley").classList.toggle("show");
         this.props.smiley(e.target.id);
     }
 
     updateParent = (e) => {
-        this.props.file(e);
+        if (e.target.files !== undefined) {
+            this.props.file(e);
+        }
     }
 
     showPopUp = () => {
@@ -47,7 +49,7 @@ class SmileyPicker extends Component {
                 </label>
 
                 <input type="file" id="file" hidden onChange={(e) => this.updateParent(e)}/>
-                {this.props.checkFile && this.props.checkFile.length>0 ?<span>{this.props.checkFile[0].name}</span>:""}
+                {this.props.checkFile && this.props.checkFile.length > 0 ? <span>{this.props.checkFile[0].name}</span> : ""}
             </div>
         )
     }

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Link, Redirect} from 'react-router-dom'
-import Navbar from "./Navbar";
+import Navbar from "./navbar/Navbar";
 import * as firebase from "firebase";
 import {isLoggedIn} from "../js/firebase";
 

@@ -5,7 +5,7 @@ import {
     Route,
 } from 'react-router-dom'
 import Login from "./components/Login";
-import Chat from "./components/Chat";
+import Chat from "./components/chat/Chat";
 import Debug from "./debug/Debug";
 import Register from "./components/Register";
 import NoMatch from "./components/NoMatch";

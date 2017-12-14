@@ -40,7 +40,7 @@ public class Profile implements Serializable {
     public void setSoundEnabled(boolean soundEnabled) {
         this.soundEnabled = soundEnabled;
     }
-    
+
     public String getToken() {
         return token;
     }
@@ -99,9 +99,7 @@ public class Profile implements Serializable {
 
     @Override
     public String toString() {
-        return "Profile{" + "username=" + username + ", tutor=" + tutor + ", assignedTutor=" + assignedTutor + ", buf=" + buf + ", userSession=" + userSession + '}';
+        return "Profile{" + "username=" + username + ", messages=" + messages + ", tutor=" + tutor + ", assignedTutor=" + assignedTutor + ", buf=" + buf + ", token=" + token + ", soundEnabled=" + soundEnabled + ", userSession=" + userSession + '}';
     }
-    
-    
 
 }

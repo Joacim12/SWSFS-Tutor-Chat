@@ -18,9 +18,9 @@ if (!firebase.apps.length) {
 
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
-        console.log("authenticated")
+      //  console.log("authenticated")
     } else {
-        console.log("no user")
+      //  console.log("no user")
     }
 });
 

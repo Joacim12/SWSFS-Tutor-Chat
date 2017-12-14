@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router-dom'
-import Navbar from "./Navbar";
+import Navbar from "./navbar/Navbar";
 import firebase from "../js/firebase.js";
-
-// our websocket URL, can be changed from package.json
-const webSocket = require("../../package.json").webSocket;
+import webSocket from "../js/websocket.js";
 
 /**
  * Component responsible for registering new users.
@@ -20,8 +18,8 @@ class Register extends Component {
     }
 
     componentDidMount() {
-        let connection = new WebSocket(webSocket + "register");
-        this.setState({connection: connection});
+        let connection = new WebSocket(webSocket + "register/null");
+        this.setState({connection});
     }
 
     /**

@@ -1,29 +1,31 @@
 let connection;
+// let webSocket = "wss://cphbusiness.tk/chat/";
 let webSocket = "ws://localhost:8084/TutorChat/chat/";
 let user;
 
-
-export function setConnection(userAndToken){
-    if(connection===undefined){
-    connection = new WebSocket(webSocket + userAndToken);
-    } else{
+export function setConnection(userAndToken) {
+    if (connection === undefined) {
+            connection = new WebSocket(webSocket + userAndToken);
+    } else {
         console.log("already connected!")
     }
 }
 
-export function setUser(usr){
+export default webSocket;
+
+export function setUser(usr) {
     user = usr;
 }
 
-export function getUser(){
+export function getUser() {
     return user;
 }
 
-export function getConnection(){
+export function getConnection() {
     return connection;
 }
 
-export function closeConnection(){
+export function closeConnection() {
     user = null;
     connection.close();
     connection = undefined;

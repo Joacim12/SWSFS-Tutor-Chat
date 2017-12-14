@@ -1,5 +1,6 @@
 package model;
 
+import com.google.gson.Gson;
 import entity.Message;
 import entity.Profile;
 import facade.UserFacade;
@@ -64,6 +65,12 @@ public class MessageHandler {
                 break;
             case "getUsers":
                 sendGetUsersMessage(message);
+                break;
+            case "updateUser":
+                Profile a = new Gson().fromJson(message.getProfile(), Profile.class);
+                Profile p = USERFACADE.getProfileById(a.getUsername());
+                p.setSoundEnabled(a.isSoundEnabled()); 
+                getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
                 break;
             default:
                 System.out.println("something went wrong" + message);
@@ -211,11 +218,11 @@ public class MessageHandler {
     private void sendRemoveTutorMessage(Message message) throws IOException, EncodeException {
         getUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
     }
-    
-    private void sendGetUsersMessage(Message message) throws IOException, EncodeException{
-        if(getUser(message.getFromProfile()).isTutor()){
-            getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(getUserFacade().getProfiles());
-        }
+
+    private void sendGetUsersMessage(Message message) throws IOException, EncodeException {
+//        if (getUser(message.getFromProfile()).isTutor()) {
+//            getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(getUserFacade().getProfiles());
+//        }
     }
 
     // From here everything is more or less getters and setters

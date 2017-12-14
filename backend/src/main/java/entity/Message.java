@@ -25,11 +25,21 @@ public class Message implements Serializable {
     @Lob
     private String content;
     
+    @Transient
+    private String profile;
+    
 
     public Message() {
     }
 
-    
+    public String getProfile() {
+        return profile;
+    }
+
+    public void setProfile(String profile) {
+        this.profile = profile;
+    }
+
     public Long getId() {
         return id;
     }
@@ -72,7 +82,8 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        return "Message{" + "id=" + id + ", toProfile=" + toProfile + ", fromProfile=" + fromProfile + ", command=" + command + ", content=" + content + '}';
+        return "Message{" + "id=" + id + ", toProfile=" + toProfile + ", fromProfile=" + fromProfile + ", command=" + command + ", content=" + content + ", profile=" + profile + '}';
     }
+    
     
 }

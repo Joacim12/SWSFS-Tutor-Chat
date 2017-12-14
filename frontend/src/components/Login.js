@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Link, Redirect} from 'react-router-dom'
 import Navbar from "./Navbar";
 import * as firebase from "firebase";
+import {isLoggedIn} from "../js/firebase";
 
 class Login extends Component {
 
@@ -10,14 +11,18 @@ class Login extends Component {
         password:'',
         redirect: false,
         error:"",
+        token:""
     }
 
     signIn = () => {
         firebase.auth().signInWithEmailAndPassword(this.state.username, this.state.password)
-            .then(() => {
-                this.setState({redirect: true})
+            .then((user) => {
+                user.getIdToken(true)
+                    .then((token)=>{
+                        this.setState({redirect:true,token})
+                    })
             })
-            .catch( (error)=> {
+            .catch((error)=> {
                this.setState({error})
             });
     }
@@ -46,13 +51,13 @@ class Login extends Component {
     }
 
     render() {
-        if (this.state.redirect === true) {
+        if (this.state.redirect === true && isLoggedIn()) {
             return (
-                <Redirect to={{pathname: "/chat", state: {username: this.state.username}}}/>
+                <Redirect to={{pathname: "/chat",state:{username:this.state.username,token:this.state.token}}}/>
             )
         }
         return (
-            <div>
+            <div style={{backgroundColor:"#f2f2f2", minHeight:"100vh"}}>
                 <Navbar/>
                 <br/>
                 <h2 className="text-center">Welcome to TutorChat</h2>

@@ -1,7 +1,7 @@
-package decoder;
+package encoder;
 
-import com.google.gson.Gson;
 import entity.ChatDebugger;
+import com.google.gson.Gson;
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;

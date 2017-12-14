@@ -5,59 +5,47 @@ import Navbar from "./Navbar";
 import beep from "../resources/beep.wav"
 import ChatArea from "./ChatArea";
 import ToolBar from "./ToolBar";
-import * as firebase from "firebase"
-
-const webSocket = require("../../package.json").webSocket;
+import { isLoggedIn} from "../js/firebase";
+import {closeConnection, getConnection, getUser, setConnection, setUser} from "../js/websocket";
 
 
 class Chat extends Component {
 
     state = {
-        connection: null, users: [], textArea: '',
-        username: '', message: '',
+        users: [], textArea: '',
+        user: '', message: '',
         disconnected: false, toProfile: null,
         command: 'needHelp', usersNeedHelp: [],
-        file: [], blobUrl: '', messages: []
-    }
+        file: [], blobUrl: '', loading: true, redirect: false
+    };
 
-    componentWillMount() {
-        if (this.props.location.state !== undefined && this.props.location.state.username !== undefined) {
-            this.setState({username: this.props.location.state.username})
+
+    componentDidMount = () => {
+        if (!isLoggedIn() || this.props.location.state === undefined) {
+            this.setState({redirect: true})
+        } else {
+            if (getConnection() === undefined) {
+                setConnection(this.props.location.state.username+"/"+this.props.location.state.token);
+                getConnection().onmessage = this.handleMessage;
+            } else{
+                getConnection().onmessage = this.handleMessage;
+                this.setState({user:getUser(),loading:false});
+            }
         }
-    }
 
-    componentDidMount() {
-        let connection = new WebSocket(webSocket + this.state.username);
-        this.setState({connection: connection},
-            () => {connection.onmessage = this.handleMessage;},
-            this.requestWebNotificationPermission())
-    }
+    };
 
     componentDidUpdate() {
-        if (this.state.connection.readyState >= 2) {
-            this.setState({
-                disconnected: true
-            })
+        if (this.props.location.state === undefined) {
+            if (getConnection().readyState >= 2) {
+                this.setState({disconnected: true})
+            }
         }
     }
 
-    requestWebNotificationPermission = () => {
-        const messaging = firebase.messaging();
-        messaging.requestPermission()
-            .then(() => {
-                messaging.getToken().then(token => {
-                    let msg = JSON.stringify({
-                        "toProfile": "",
-                        'fromProfile': this.state.username,
-                        'command': "webNoti",
-                        'content': token
-                    })
-                    this.state.connection.send(msg);
-                })
-            }).catch((err) => {
-            console.log(err) //No error handling :(
-        })
-    }
+    closeWebsocket = () => {
+        closeConnection();
+    };
 
     handleMessage = (e) => {
         if (e.data.constructor === Blob) {
@@ -65,6 +53,11 @@ class Chat extends Component {
         } else {
             let message = JSON.parse(e.data);
             let date = new Date();
+            if (message.username) {
+                setUser(message);
+                // We received our user object, let's set loading to false.
+                this.setState({user: message, loading: false})
+            }
             if (message.command === 'needHelp') {
                 if (message && message.content) {
                     this.setState({usersNeedHelp: message.content.split(";")})
@@ -72,18 +65,24 @@ class Chat extends Component {
                     this.setState({usersNeedHelp: []})
                 }
             } else if (message.command === 'file') {
-                new Audio(beep).play()
+                if (this.state.user.soundEnabled) {
+                    new Audio(beep).play();
+                }
                 message.content += ";" + this.state.blobUrl;
                 message.time = " " + new Date().toLocaleTimeString('en-GB');
-                this.setState(prevState => ({messages: [...prevState.messages, message]}));
+                let user = this.state.user;
+                user.messages.push(message);
+                this.setState({user});
             } else if (message.command === 'setTutor') {
                 let chatMessages = this.state.textArea;
                 chatMessages += '\n' + message.content + ' connected - ' + date.getHours() + ":" + date.getMinutes();
                 this.setState({
                     toProfile: message.content,
                     textArea: chatMessages,
-                    command: 'message'
+                    command: 'message',
                 })
+            } else if (message.command === 'removeTutor') {
+                this.setState({command: 'needHelp'})
             } else if (message.command === 'connectedUsers') {
                 if (message.content.split(";")[0] === "") {
                     this.setState({users: []})
@@ -92,12 +91,16 @@ class Chat extends Component {
                 }
             }
             else {
-                new Audio(beep).play()
+                if (this.state.user.soundEnabled) {
+                    new Audio(beep).play()
+                }
                 message.time = " " + new Date().toLocaleTimeString('en-GB');
-                this.setState(prevState => ({messages: [...prevState.messages, message]}));
+                let user = this.state.user;
+                user.messages.push(message);
+                this.setState({user});
             }
         }
-    }
+    };
 
     handleList = (e) => {
         this.setState({toProfile: e.target.id.split(":")[0]})
@@ -106,11 +109,11 @@ class Chat extends Component {
     takeUser = (user) => {
         this.setState({command: "message"})
         let msg = JSON.stringify({
-            'fromProfile': this.state.username,
+            'fromProfile': this.state.user.username,
             'command': "take",
-            'content': user.target.id
+            'content': user.target.id,
         })
-        this.state.connection.send(msg)
+        getConnection().send(msg)
     }
 
     renderNeedsHelp = () => {
@@ -130,15 +133,16 @@ class Chat extends Component {
         var file = this.state.file[0];
         let msg = JSON.stringify({
             "toProfile": this.state.toProfile,
-            'fromProfile': this.state.username,
+            'fromProfile': this.state.user.username,
             'command': 'file',
             'content': file.name
-        })
-        this.state.connection.send(file);
-        this.state.connection.send(msg);
+        });
+        getConnection().send(file);
+        getConnection().send(msg);
     }
 
     sendMessage = () => {
+
         if (this.state.file.length > 0) {
             this.sendFile();
         }
@@ -148,20 +152,21 @@ class Chat extends Component {
         })
         let msg = JSON.stringify({
             "toProfile": this.state.toProfile,
-            'fromProfile': this.state.username,
+            'fromProfile': this.state.user.username,
             'command': this.state.command,
             'content': this.state.message,
         })
         if (this.state.message.length >= 1) {
-            this.state.connection.send((msg))
+            console.log("sending messsage")
+            getConnection().send(msg)
         }
     }
 
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
-        })
-    }
+        });
+    };
 
 
     handleKeyPress = (e) => {
@@ -174,13 +179,13 @@ class Chat extends Component {
     handleDc = (e) => {
         let msg = JSON.stringify({
             "toProfile": 'server',
-            'fromProfile': this.state.username,
+            'fromProfile': this.state.user.username,
             'command': 'release',
-            'content': e.target.id
+            'content': e.target.id,
 
-        })
-        this.setState({toProfile: ''})
-        this.state.connection.send(msg);
+        });
+        this.setState({toProfile: ''});
+        getConnection().send(msg);
     }
 
     setFile = (e) => {
@@ -188,24 +193,32 @@ class Chat extends Component {
     }
 
     addSmiley = (e) => {
-        this.setState((prevState) => ({message: prevState.message + e}))
+        this.setState((prevState) => ({message: prevState.message + e}));
     }
 
 
     render() {
-        if (this.state.username.length <= 0 || this.state.disconnected) {
+
+        if (this.state.disconnected || this.state.redirect) {
             return (
                 <Redirect to={'/'}/>
+            );
+        };
+
+        if (this.state.loading) {
+            return (
+                <div>Fancy loading screen here</div>
             )
         }
         return (
-            <div>
-                <Navbar username={this.state.username}/>
+            <div style={{backgroundColor: "#f2f2f2", minHeight: "100vh"}}>
+                <Navbar user={this.state.user} close={this.closeWebsocket}/>
                 <div className="container">
                     <br/>
                     <div className="row">
                         <div className="col-9">
-                            <ChatArea chat={this.state.messages}/>
+                            <br/>
+                            <ChatArea chat={this.state.user.messages}/>
                             <br/>
                         </div>
                         <div className="col-3">
@@ -217,7 +230,7 @@ class Chat extends Component {
                     </div>
                     <div className="row">
                         <div className="col-9">
-                            <ToolBar file={this.setFile} smiley={this.addSmiley}/>
+                            <ToolBar checkFile={this.state.file} file={this.setFile} smiley={this.addSmiley}/>
                             <textarea className="form-control"
                                       placeholder="Write a message ..."
                                       id="message"
@@ -226,7 +239,7 @@ class Chat extends Component {
                                       value={this.state.message}
                                       style={{
                                           backgroundColor: "#f8f9fa",
-                                          boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)",
+                                          boxShadow: "0px 5px 10px 10px rgba(224,224,224,1)",
                                           overflowX: "hidden"
                                       }}
                                       onChange={this.handleChange}/>

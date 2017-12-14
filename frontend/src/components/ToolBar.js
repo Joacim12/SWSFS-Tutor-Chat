@@ -47,6 +47,7 @@ class SmileyPicker extends Component {
                 </label>
 
                 <input type="file" id="file" hidden onChange={(e) => this.updateParent(e)}/>
+                {this.props.checkFile && this.props.checkFile.length>0 ?<span>{this.props.checkFile[0].name}</span>:""}
             </div>
         )
     }

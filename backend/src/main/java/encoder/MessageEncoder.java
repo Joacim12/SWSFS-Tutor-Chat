@@ -1,4 +1,4 @@
-package decoder;
+package encoder;
 
 import com.google.gson.Gson;
 import entity.Message;

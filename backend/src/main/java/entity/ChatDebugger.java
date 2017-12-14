@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  *
- * @author joaci
+ * @author joacim
  */
 public class ChatDebugger {
     private List<ProfileJson> profiles;

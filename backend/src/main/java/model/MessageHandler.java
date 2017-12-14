@@ -59,6 +59,12 @@ public class MessageHandler {
             case "needHelp":
                 sendNeedHelpMessage(message);
                 break;
+            case "removeTutor":
+                sendRemoveTutorMessage(message);
+                break;
+            case "getUsers":
+                sendGetUsersMessage(message);
+                break;
             default:
                 System.out.println("something went wrong" + message);
                 break;
@@ -76,10 +82,8 @@ public class MessageHandler {
      */
     public void addUser(Profile dbUser) throws EncodeException, IOException {
         ONLINEPROFILES.add(dbUser);
-        // Would be smarter sending the whole list.
-        for (Message message : dbUser.getMessages()) {
-            dbUser.getSession().getBasicRemote().sendObject(message);
-        }
+        dbUser.getSession().getBasicRemote().sendObject(dbUser); // Sending the user to the client
+        System.out.println("user sent");
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
                 if (!profile.equals(dbUser) && profile.getToken() != null) {
@@ -99,6 +103,13 @@ public class MessageHandler {
      */
     public void disconnectHandler(Session session) throws EncodeException, IOException {
         for (Profile profile : ONLINEPROFILES) {
+            if (profile.isTutor()) {
+                for (Profile profile1 : ONLINEPROFILES) {
+                    if (profile1.getAssignedTutor() != null && profile1.getAssignedTutor().equals(profile.getUsername())) {
+                        removeTutor(profile1.getUsername());
+                    }
+                }
+            }
             if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(getUser(session).getUsername())) {
                 profile.setAssignedTutor(null);
                 NOTGETTINGHELP.put(profile, profile.getMessages());
@@ -197,6 +208,16 @@ public class MessageHandler {
         }
     }
 
+    private void sendRemoveTutorMessage(Message message) throws IOException, EncodeException {
+        getUser(message.getToProfile()).getSession().getBasicRemote().sendObject(message);
+    }
+    
+    private void sendGetUsersMessage(Message message) throws IOException, EncodeException{
+        if(getUser(message.getFromProfile()).isTutor()){
+            getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(getUserFacade().getProfiles());
+        }
+    }
+
     // From here everything is more or less getters and setters
     private Message setTutor(Message message, Profile u) {
         Message m = new Message();
@@ -210,7 +231,7 @@ public class MessageHandler {
     private Message removeTutor(String username) {
         Message m = new Message();
         m.setFromProfile("Server");
-        m.setCommand("setTutor");
+        m.setCommand("removeTutor");
         m.setContent("");
         m.setToProfile(username);
         return m;

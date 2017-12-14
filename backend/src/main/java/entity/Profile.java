@@ -49,16 +49,6 @@ public class Profile implements Serializable {
         this.token = token;
     }
 
-    public Session getUserSession() {
-        return userSession;
-    }
-
-    public void setUserSession(Session userSession) {
-        this.userSession = userSession;
-    }
-
-    
-    
     public Session getSession() {
         return userSession;
     }

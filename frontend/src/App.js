@@ -8,6 +8,8 @@ import Login from "./components/Login";
 import Chat from "./components/Chat";
 import Debug from "./debug/Debug";
 import Register from "./components/Register";
+import NoMatch from "./components/NoMatch";
+import Admin from "./components/Admin";
 
 class App extends Component {
     render() {
@@ -18,6 +20,8 @@ class App extends Component {
                     <Route path="/chat" component={Chat}/>
                     <Route path="/debug" component={Debug}/>
                     <Route path="/register" component={Register}/>
+                    <Route path="/admin" component={Admin}/>
+                    <Route component={NoMatch}/>
                 </Switch>
             </Router>
         );

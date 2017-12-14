@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.Transient;
 
 /**
  *
@@ -21,11 +22,13 @@ public class Message implements Serializable {
     private String toProfile;
     private String fromProfile;
     private String command;
-//    @Lob
+    @Lob
     private String content;
+    
 
     public Message() {
     }
+
     
     public Long getId() {
         return id;
@@ -71,7 +74,5 @@ public class Message implements Serializable {
     public String toString() {
         return "Message{" + "id=" + id + ", toProfile=" + toProfile + ", fromProfile=" + fromProfile + ", command=" + command + ", content=" + content + '}';
     }
-
-    
     
 }

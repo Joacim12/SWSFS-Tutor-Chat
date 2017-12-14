@@ -17,6 +17,7 @@ class ChatArea extends Component {
                                 <span style={{color: "#dcdbde"}}>{message.time}</span>
                             </p>
                             {message.command === 'file' ?
+
                                 <a href={message.content.split(";")[1]} style={{margin: "0px"}}
                                    download={message.content.split(";")[0]}>{message.content.split(";")[0]}</a>
                                 : <p style={{margin: "5px", fontSize: "15px"}}>{message.content}</p>}
@@ -26,6 +27,10 @@ class ChatArea extends Component {
             )
         })
 
+    }
+
+    componentDidMount(){
+        this.scroll();
     }
 
     componentDidUpdate (){
@@ -46,7 +51,7 @@ class ChatArea extends Component {
                      maxHeight: "300px",
                      height: "300px",
                      backgroundColor: "#f8f9fa",
-                     boxShadow: "0px 5px 73px -26px rgba(13,10,212,1)"
+                     boxShadow: "0px 5px 10px 10px rgba(224,224,224,1)"
                  }}>
                 {this.renderChat()}
             </div>

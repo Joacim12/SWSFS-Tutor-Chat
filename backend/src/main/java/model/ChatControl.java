@@ -1,9 +1,9 @@
 package model;
 
-import com.google.gson.Gson;
-import decoder.DebugEncoder;
+import encoder.DebugEncoder;
 import decoder.MessageDecoder;
-import decoder.MessageEncoder;
+import encoder.MessageEncoder;
+import encoder.ProfileEncoder;
 import entity.ChatDebugger;
 import entity.Message;
 import entity.Profile;
@@ -15,12 +15,14 @@ import javax.websocket.*;
 import javax.websocket.server.*;
 
 /**
- * The websocket server endpoint class, listening on localhost/chat/
- * Uses three encoders, which will take the Message object or Debug and convert 
- * it to json.
+ * The websocket server endpoint class, listening on localhost/chat/ Uses four
+ * encoders, which will take the Message object, Profile object or Debug object
+ * and convert it to json.
+ *
  * @author jvetterlain
  */
-@ServerEndpoint(value = "/chat/{param}", decoders = MessageDecoder.class, encoders = {MessageEncoder.class, DebugEncoder.class})
+@ServerEndpoint(value = "/chat/{param}/{token}", decoders = MessageDecoder.class,
+        encoders = {MessageEncoder.class, DebugEncoder.class, ProfileEncoder.class})
 public class ChatControl {
 
     private MessageHandler mh;
@@ -32,19 +34,24 @@ public class ChatControl {
     }
 
     /**
-     * When a client opens a connection, this method will be called.
-     * Here we check the path parameter and hanldes that.
+     * When a client opens a connection, this method will be called. Here we
+     * check the path parameter and handles that.
+     *
      * @param session used for sending messages to the user.
      * @param param used for determing if it's a debug session or new register,
      * or just a user logging in.
+     * @param token is used to validate if user is signed into front end.
      */
     @OnOpen
-    public void onOpen(Session session, @PathParam("param") String param) throws EncodeException, IOException {
-        if (param.equals("debug")) {
-            debug.setSession(session);
-        } else if (param.equals("register")) {
-            return;
-        } else {
+    public void onOpen(Session session, @PathParam("param") String param,
+            @PathParam("token") String token) throws EncodeException, IOException {
+        param = param.toLowerCase();
+//        if (param.equals("debug")) {    // IMPORTANT!! outcomment this in production
+//            debug.setSession(session);  // IMPORTANT!! outcomment this in production
+//        }                               // IMPORTANT!! outcomment this in production
+//        else                            // IMPORTANT!! outcomment this in production
+        if (param.equals("register")) {
+        } else if (new FireBaseAuth().validateUser(token) != null) {
             for (Profile user : mh.getUserFacade().getProfiles()) {
                 if (user.getUsername().equals(param)) {
                     user.setSession(session);
@@ -60,8 +67,9 @@ public class ChatControl {
     }
 
     /**
-     * This class is responsible for forwarding files from one client to another.
-     * And will be called if the client send a byte array.
+     * This class is responsible for forwarding files from one client to
+     * another. And will be called if the client send a byte array.
+     *
      * @param is the file coming from the client
      * @param session the user who sent the files session
      */
@@ -78,10 +86,10 @@ public class ChatControl {
     }
 
     /**
-     * OnMessage for 'text messages' 
-     * Will take the session and message parameters and either create a user,
-     * send a message to the chatdebugger and send the message,
-     * or just send a message.
+     * OnMessage for 'text messages' Will take the session and message
+     * parameters and either create a user, send a message to the chatdebugger
+     * and send the message, or just send a message.
+     *
      * @param session contains info about the client who sent the messages info
      * @param message the message the client wants to send.
      */
@@ -90,7 +98,7 @@ public class ChatControl {
         if (message.getCommand().equals("createUser")) {
             Profile p = new Profile();
             p.setMessages(new ArrayList());
-            p.setUsername(message.getContent());
+            p.setUsername(message.getContent()); // should be ok, since firebase only allows ^[0-9a-zA-Z]{27}[0-9]$
             mh.getUserFacade().createProfile(p);
         }
         if (debug.getSession() != null) {
@@ -99,13 +107,13 @@ public class ChatControl {
             debug.getSession().getAsyncRemote().sendObject(chatDebugger);
             mh.handleMessage(message);
         } else {
-            mh.handleMessage(message);
+                mh.handleMessage(message);
         }
     }
 
-    
     /**
      * Will be called if an error gets thrown, or the user disconnects.
+     *
      * @param session the session that should be removed from our system.
      */
     @OnClose
@@ -116,15 +124,16 @@ public class ChatControl {
     }
 
     /**
-     * Will currently just print the throwable, get's called everytime a user disconnects
-     * since the frontend never calls close.
+     * Will currently just print the throwable, get's called everytime a user
+     * disconnects since the frontend never calls close.
+     *
      * @param session who caused the error.
      * @param throwable the error
      */
     @OnError
     public void onError(Session session, Throwable throwable) throws EncodeException, IOException {
-//        System.out.println(throwable);
-        throwable.printStackTrace();// incomment for seeing full errors
+        System.out.println(throwable);
+//        throwable.printStackTrace();// incomment for seeing full errors
     }
 
 }

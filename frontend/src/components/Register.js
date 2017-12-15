@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router-dom'
+import {Link, Redirect} from 'react-router-dom'
 import Navbar from "./navbar/Navbar";
 import firebase from "../js/firebase.js";
 import webSocket from "../js/websocket.js";
+import {isLoggedIn} from "../js/firebase";
 
 /**
  * Component responsible for registering new users.
@@ -10,11 +11,12 @@ import webSocket from "../js/websocket.js";
 class Register extends Component {
 
     state = {
-        email: '',
+        username: '',
         password: "",
         error: "",
-        success: false,
         connection: null,
+        token: "",
+        redirect: false
     }
 
     componentDidMount() {
@@ -24,18 +26,31 @@ class Register extends Component {
 
     /**
      * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
-     * username there aswell.
+     * username there aswell. THen logs the user in with the new user, and redirects to the chat page, with token and username.
      */
     register = () => {
         let profile = {
             "command": "createUser",
-            "content": this.state.email
+            "content": this.state.username
         }
 
-        firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+        firebase.auth().createUserWithEmailAndPassword(this.state.username, this.state.password)
             .then(() => {
-                this.state.connection.send(JSON.stringify(profile));
-                this.setState({error:"",success: true})
+                this.state.connection.send(JSON.stringify(profile))
+                        firebase.auth().signInWithEmailAndPassword(this.state.username, this.state.password)
+                            .then((user) => {
+                                user.getIdToken(true)
+                                    .then((token) => {
+                                        console.log("token")
+                                        setTimeout(this.state.connection.close(),4000); // hmm
+                                        console.log("2 sec")
+                                        this.setState({redirect: true, token})
+                                    })
+                            })
+                            .catch((error) => {
+                                this.setState({error})
+                            });
+                this.setState({error: ""})
             })
             .catch(error => {
                 this.setState({error})
@@ -57,19 +72,6 @@ class Register extends Component {
         }
     }
 
-    /**
-     *
-     * @returns a green box with user created!
-     */
-    renderSuccess() {
-        if (this.state.success) {
-            return (
-                <div className="alert alert-success">
-                    <p>User created!</p>
-                </div>
-            )
-        }
-    }
 
     /**
      * This method handles updating the relevant attribute in state
@@ -79,7 +81,7 @@ class Register extends Component {
     handleInput = (event) => {
         this.setState({
             [event.target.name]: event.target.value
-        })
+        },console.log(this.state))
     }
 
     /**
@@ -98,6 +100,13 @@ class Register extends Component {
      * @returns the rendered page.
      */
     render() {
+
+        if (this.state.redirect === true && isLoggedIn()) {
+            return (
+                <Redirect to={{pathname: "/chat", state: {username: this.state.username, token: this.state.token}}}/>
+            )
+        }
+
         return (
             <div>
                 <Navbar/>
@@ -105,14 +114,13 @@ class Register extends Component {
                 <div className="container">
                     <h2>Create user</h2>
                     {this.renderError()}
-                    {this.renderSuccess()}
                     <div className="row">
                         <div className="col">
                             <br/>
                             <label>Email:</label>
                             <input className="form-control" onChange={this.handleInput}
                                    type="email"
-                                   placeholder="Email" name="email"/>
+                                   placeholder="Email" name="username"/>
                             <label>Password:</label>
                             <input onKeyUp={this.handleKeyPress} className="form-control"
                                    onChange={this.handleInput}

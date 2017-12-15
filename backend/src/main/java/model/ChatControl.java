@@ -48,14 +48,19 @@ public class ChatControl {
     public void onOpen(Session session, @PathParam("param") String param,
             @PathParam("token") String token, EndpointConfig conf) throws EncodeException, IOException {
         param = param.toLowerCase();
+        System.out.println(token);
 //        if (param.equals("debug")) {    // IMPORTANT!! outcomment this in production
 //            debug.setSession(session);  // IMPORTANT!! outcomment this in production
 //        }                               // IMPORTANT!! outcomment this in production
 //        else                            // IMPORTANT!! outcomment this in production
         if (param.equals("register")) {
         } else if (new FireBaseAuth().validateUser(token) != null) {
+            System.out.println("validated");
             for (Profile user : mh.getUserFacade().getProfiles()) {
+                System.out.println("searching");
+                System.out.println(user.getUsername() + param);
                 if (user.getUsername().equals(param)) {
+                    System.out.println("found");
                     user.setSession(session);
                     mh.addUser(user);
                 }
@@ -100,7 +105,8 @@ public class ChatControl {
         if (message.getCommand().equals("createUser")) {
             Profile p = new Profile();
             p.setMessages(new ArrayList());
-            p.setUsername(message.getContent()); // should be ok, since firebase only allows ^[0-9a-zA-Z]{27}[0-9]$
+            p.setUsername(message.getContent());
+            System.out.println(p);
             mh.getUserFacade().createProfile(p);
             return;
         }

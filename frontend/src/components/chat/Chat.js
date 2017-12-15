@@ -24,7 +24,9 @@ class Chat extends Component {
         if (!isLoggedIn() || this.props.location.state === undefined) {
             this.setState({redirect: true})
         } else {
+            console.log(getConnection())
             if (getConnection() === undefined) {
+                console.log(this.props.location.state.token)
                 setConnection(this.props.location.state.username+"/"+this.props.location.state.token);
                 getConnection().onmessage = this.handleMessage;
             } else{
@@ -52,6 +54,7 @@ class Chat extends Component {
             this.setState({blobUrl: URL.createObjectURL(e.data)})
         } else {
             let message = JSON.parse(e.data);
+            console.log(message);
             let date = new Date();
             if (message.username) {
                 setUser(message);

@@ -8,24 +8,24 @@ class Login extends Component {
 
     state = {
         username: '',
-        password:'',
+        password: '',
         redirect: false,
-        error:"",
-        token:""
-    }
+        error: "",
+        token: ""
+    };
 
     signIn = () => {
         firebase.auth().signInWithEmailAndPassword(this.state.username, this.state.password)
             .then((user) => {
                 user.getIdToken(true)
-                    .then((token)=>{
-                        this.setState({redirect:true,token})
+                    .then((token) => {
+                        this.setState({redirect: true, token})
                     })
             })
-            .catch((error)=> {
-               this.setState({error})
+            .catch((error) => {
+                this.setState({error})
             });
-    }
+    };
 
     renderError() {
         if (this.state.error.code !== undefined) {
@@ -42,38 +42,38 @@ class Login extends Component {
         this.setState({
             [event.target.name]: event.target.value
         })
-    }
+    };
 
     handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             this.signIn()
         }
-    }
+    };
 
     render() {
         if (this.state.redirect === true && isLoggedIn()) {
             return (
-                <Redirect to={{pathname: "/chat",state:{username:this.state.username,token:this.state.token}}}/>
+                <Redirect to={{pathname: "/chat", state: {username: this.state.username, token: this.state.token}}}/>
             )
         }
         return (
-            <div style={{backgroundColor:"#f2f2f2", minHeight:"100vh"}}>
+            <div style={{backgroundColor: "#f2f2f2", minHeight: "100vh"}}>
                 <Navbar/>
                 <br/>
                 <h2 className="text-center">Welcome to TutorChat</h2>
                 {this.renderError()}
                 <div className="row">
-                    <div className="col"></div>
+                    <div className="col"/>
                     <div className="col">
                         <br/>
                         <label>Username:</label>
                         <input className="form-control" onChange={this.handleInput}
                                type="text"
-                               placeholder="Username" name="username"/>
+                               placeholder="Username" name="username" autoComplete="username"/>
                         <label>Password:</label>
                         <input onKeyUp={this.handleKeyPress} className="form-control" onChange={this.handleInput}
                                type="password"
-                               placeholder="Password" name="password"/>
+                               placeholder="Password" name="password" autoComplete="current-password"/>
                         <br/>
                         <button className="btn btn-secondary" value="Connect" onClick={this.signIn}>Connect</button>
                         <Link style={{margin: 10}} className="btn btn-warning" value="Create user" to="/register">Create
@@ -81,7 +81,7 @@ class Login extends Component {
                         <br/>
                         <hr/>
                     </div>
-                    <div className="col"></div>
+                    <div className="col"/>
                 </div>
             </div>
         );

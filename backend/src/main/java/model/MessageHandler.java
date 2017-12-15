@@ -35,6 +35,7 @@ public class MessageHandler {
      * @param message the message with the command
      */
     public void handleMessage(Message message) throws IOException, EncodeException {
+        System.out.println(message);
         switch (message.getCommand()) {
             case "message":
                 sendMessage(message);
@@ -69,7 +70,7 @@ public class MessageHandler {
             case "updateUser":
                 Profile a = new Gson().fromJson(message.getProfile(), Profile.class);
                 Profile p = USERFACADE.getProfileById(a.getUsername());
-                p.setSoundEnabled(a.isSoundEnabled()); 
+                p.setSoundEnabled(a.isSoundEnabled());
                 getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
                 break;
             default:
@@ -90,7 +91,7 @@ public class MessageHandler {
     public void addUser(Profile dbUser) throws EncodeException, IOException {
         ONLINEPROFILES.add(dbUser);
         dbUser.getSession().getBasicRemote().sendObject(dbUser); // Sending the user to the client
-        System.out.println("user sent");
+        System.out.println("user sent" + dbUser);
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
                 if (!profile.equals(dbUser) && profile.getToken() != null) {
@@ -109,24 +110,26 @@ public class MessageHandler {
      * @param session the user session we want to remove from our system
      */
     public void disconnectHandler(Session session) throws EncodeException, IOException {
-        for (Profile profile : ONLINEPROFILES) {
-            if (profile.isTutor()) {
-                for (Profile profile1 : ONLINEPROFILES) {
-                    if (profile1.getAssignedTutor() != null && profile1.getAssignedTutor().equals(profile.getUsername())) {
-                        removeTutor(profile1.getUsername());
+        if (ONLINEPROFILES.contains(getUser(session))) {
+            for (Profile profile : ONLINEPROFILES) {
+                if (profile.isTutor()) {
+                    for (Profile profile1 : ONLINEPROFILES) {
+                        if (profile1.getAssignedTutor() != null && profile1.getAssignedTutor().equals(profile.getUsername())) {
+                            removeTutor(profile1.getUsername());
+                        }
                     }
                 }
+                if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(getUser(session).getUsername())) {
+                    profile.setAssignedTutor(null);
+                    NOTGETTINGHELP.put(profile, profile.getMessages());
+                    profile.getSession().getBasicRemote().sendObject(removeTutor(profile.getUsername()));
+                }
             }
-            if (profile.getAssignedTutor() != null && profile.getAssignedTutor().equals(getUser(session).getUsername())) {
-                profile.setAssignedTutor(null);
-                NOTGETTINGHELP.put(profile, profile.getMessages());
-                profile.getSession().getBasicRemote().sendObject(removeTutor(profile.getUsername()));
-            }
+            NOTGETTINGHELP.remove(getUser(session));
+            ONLINEPROFILES.remove(getUser(session));
+            handleMessage(getNeedHelp());
+            getConnectedToTutor();
         }
-        NOTGETTINGHELP.remove(getUser(session));
-        ONLINEPROFILES.remove(getUser(session));
-        handleMessage(getNeedHelp());
-        getConnectedToTutor();
     }
 
     //  The following classes takes in a Message object, and does what the method

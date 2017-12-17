@@ -35,20 +35,20 @@
 Dette er et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
 
 Projektet er bygget op med en Java backend med jpa og en mysql database, en ReactJs frontend, og Firebase til authentication.
-Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}
+Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}/{token}
 
 Lige nu er der tre parametre systemet "lytter" efter, "register", "debug" ellers "{brugernavn}"
-Hvis man kalder serveren på 127.0.0.1/chat/debug bliver der registreret en debgger session, hvor alle chat beskeder samt brugere der logger ind/ud bliver sendt til.
+Hvis man kalder serveren på 127.0.0.1/chat/debug/null bliver der registreret en debgger session, hvor alle indgående chat beskeder samt brugere der logger ind/ud bliver sendt til.
 
-Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
+Hvis man kalder serveren på 127.0.0.1/chat/register/null vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
 
-Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn/gyldigtoken vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
 
 Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 
-| toProfile | fromProfile | command | content |
-| --- | --- | --- | --- |
-| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+| toProfile | fromProfile | command | content | profile | profiles |
+| --- | --- | --- | --- | --- | --- |
+| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden | en profil, kunne være brugeren selv | en liste af profiler, kunne fx være online tutorer
 
 ## Demo
 Åben https://cphbusiness.tk og log ind med demo@demo.dk // demo1234 skriv en besked og se den blive sendt til dig selv! åben evt en fane mere og login med tutor@cphbusiness.tk // tutor12 og se at du kan vælge demo@demo.dk og skrive/sende filer frem og tilbage + du får en push notifikation når tutor logger ind(Hvis du tillader meddelelser)

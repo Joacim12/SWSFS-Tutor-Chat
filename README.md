@@ -133,6 +133,14 @@ Returnerer antal tutorer online.
 
 Ovenstående eksempel sender først filen til en modtager, og herefter sender den en besked til modtager med filnavnet, når serveren modtager besked to, sender den filen i en besked til modtager.
 
+## Oprettelse af brugere.
+Brugere kan selv registrere sig ved at trykke på "create user" på forsiden, dette vil oprette en normal bruger der kun har adgang til chat.
+- Opret administrator
+For at oprette en administrator bruger, åben filen firebase.js i frontenden, og indkommenter makeAdmin metoden, og tilføj en knap i foreksempel chat.js der kalder denne funktion, nu kan man logge ind med en standard bruger, og trykke på denne knap, og brugeren du er logget ind med bliver til admin, husk at fjerne knappen igen bagefter :)
+
+- Oprettelse af tutorer
+Som admin har man via menubaren adgang til en side der hedder admin, her kan man sætte et flueben i om en bruger skal være tutor.
+
 ## Logging
 De logs jeg har kigget på, når jeg har skulle fejlsøge er:
 - nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.

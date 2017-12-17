@@ -118,91 +118,7 @@ tager hele profilen "userprofile" som json, og merger med "userprofile" i databa
 Returnerer antal tutorer online.
 
 
-## Firebase
-I frontenden samt backenden bliver firebase brugt. 
-- Frontend:
-I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
-Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
 
-I firebase konsollen skal authentication lige slåes til, det vælges ved at trykke på authenticaton og start using authentication.
-
-
-I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
-```javascript
-  /**
-     * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
-     * username there aswell.
-     */
-    register = () => {
-        let profile = {
-            "command": "createUser",
-            "content": this.state.email
-        }
-
-        firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
-            .then(() => {
-                this.state.connection.send(JSON.stringify(profile));
-                this.setState({error:"",success: true})
-            })
-            .catch(error => {
-                this.setState({error})
-            });
-    }
-```
-
-
-
-i Chat.js bruges den til at sætte en webNotifikation op: 
-```javascript
- requestWebNotificationPermission = () => {
-        const messaging = firebase.messaging();
-        messaging.requestPermission()
-            .then(() => {
-                messaging.getToken().then(token => {
-                    let msg = JSON.stringify({
-                        "toProfile": "",
-                        'fromProfile': this.state.username,
-                        'command': "webNoti",
-                        'content': token
-                    })
-                    this.state.connection.send(msg);
-                })
-            }).catch((err) => {
-            console.log(err) //No error handling :(
-        })
-    }
-```
-For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
-
-- Backend
-I backenden bruges det til at sende push notifikationerne til de brugere der har tilladt det, det gøres i PushNotifier klassen, her har jeg implementeret en http klient der sender en post til firebase's server med et objekt der indeholder data til den notifikation jeg vil sende, det ser således ud:
-
-```java 
-public void sendTutorNotification(String token, String to,String tutor) {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost("https://fcm.googleapis.com/fcm/send");
-        httpPost.setHeader("Content-type", "application/json");
-        httpPost.setHeader("Authorization", "key=AAAAdJe6NHg:APA91bGtqcE4d0Tpt8yZxdfA30wR7vsvUAHlO4IFJ6C1_UhU1WR-ToW_dOX5gdZPDYSSctWmA3YgYsUJNjEHLEUZ53zDS1qGHkRuiIpQ3mReeFK8nczo9ePDJDpaTxOd-3DVuR5bI1zZ");
-        try {
-            JsonObject j = new JsonObject();
-            j.addProperty("to", token);
-            JsonObject notification = new JsonObject();
-            notification.addProperty("title", "TutorChat");
-            notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
-            notification.addProperty("icon", "https://www.vulgaris-medical.com/sites/default/files/styles/big-lightbox/public/field/image/actualites/2016/02/12/le-chat-source-de-bienfaits-pour-votre-sante.jpg"); 
-            notification.addProperty("click_action", URL);
-            j.add("notification", notification);
-            StringEntity stringEntity = new StringEntity(j.toString());
-            httpPost.getRequestLine();
-            httpPost.setEntity(stringEntity);
-            httpClient.execute(httpPost);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-```
-key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
 
 ## Logging
 Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:
@@ -326,6 +242,92 @@ tryk ctrl +x for at gemme.
 - Skriv kommando: sudo service mysql start
 
 - Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
+
+## Firebase
+I frontenden samt backenden bliver firebase brugt. 
+- Frontend:
+I frontenden bruges firebase til at håndtere login, samt at registrere en service worker og sende push notifikationer.
+Der er en en firebase.js fil placeret i js mappen, denne fil skal udfyldes med ens config fra firebase, sådan en config kan man få ved at registrere en app her https://console.firebase.google.com/ og herefter trykke på add firebase to your webapp, så vil der komme en modal frem med de forskellige nødvendige oplysninger.
+
+I firebase konsollen skal authentication lige slåes til, det vælges ved at trykke på authenticaton og start using authentication.
+
+
+I Register.js importeres firebase.js filen ```javascript    import firebase from "../js/firebase.js";``` og kan så bruge den på følgende måde til at registrere en bruger:
+```javascript
+  /**
+     * Register user in firebase, and send a message to backend database, with the newly created user, so we can store the
+     * username there aswell.
+     */
+    register = () => {
+        let profile = {
+            "command": "createUser",
+            "content": this.state.email
+        }
+
+        firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
+            .then(() => {
+                this.state.connection.send(JSON.stringify(profile));
+                this.setState({error:"",success: true})
+            })
+            .catch(error => {
+                this.setState({error})
+            });
+    }
+```
+
+
+
+i Chat.js bruges den til at sætte en webNotifikation op: 
+```javascript
+ requestWebNotificationPermission = () => {
+        const messaging = firebase.messaging();
+        messaging.requestPermission()
+            .then(() => {
+                messaging.getToken().then(token => {
+                    let msg = JSON.stringify({
+                        "toProfile": "",
+                        'fromProfile': this.state.username,
+                        'command': "webNoti",
+                        'content': token
+                    })
+                    this.state.connection.send(msg);
+                })
+            }).catch((err) => {
+            console.log(err) //No error handling :(
+        })
+    }
+```
+For at det virker er der en ``` firebase-messaging-sw.js``` i public mappen, der registrerer en serviceworker i klientens browser.
+
+- Backend
+I backenden bruges det til at sende push notifikationerne til de brugere der har tilladt det, det gøres i PushNotifier klassen, her har jeg implementeret en http klient der sender en post til firebase's server med et objekt der indeholder data til den notifikation jeg vil sende, det ser således ud:
+
+```java 
+public void sendTutorNotification(String token, String to,String tutor) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("https://fcm.googleapis.com/fcm/send");
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setHeader("Authorization", "key=AAAAdJe6NHg:APA91bGtqcE4d0Tpt8yZxdfA30wR7vsvUAHlO4IFJ6C1_UhU1WR-ToW_dOX5gdZPDYSSctWmA3YgYsUJNjEHLEUZ53zDS1qGHkRuiIpQ3mReeFK8nczo9ePDJDpaTxOd-3DVuR5bI1zZ");
+        try {
+            JsonObject j = new JsonObject();
+            j.addProperty("to", token);
+            JsonObject notification = new JsonObject();
+            notification.addProperty("title", "TutorChat");
+            notification.addProperty("body", "Hi " + to + "\n"+tutor+" is online now. \nClick to open TutorChat");
+            notification.addProperty("icon", "https://www.vulgaris-medical.com/sites/default/files/styles/big-lightbox/public/field/image/actualites/2016/02/12/le-chat-source-de-bienfaits-pour-votre-sante.jpg"); 
+            notification.addProperty("click_action", URL);
+            j.add("notification", notification);
+            StringEntity stringEntity = new StringEntity(j.toString());
+            httpPost.getRequestLine();
+            httpPost.setEntity(stringEntity);
+            httpClient.execute(httpPost);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+```
+key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
      
 ## Local development
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash

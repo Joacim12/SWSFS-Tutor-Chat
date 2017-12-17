@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,12 +25,21 @@ public class Message implements Serializable {
     private String command;
     @Lob
     private String content;
-    
+
     @Transient
     private String profile;
-    
+    @Transient
+    private List<Profile> profiles;
 
     public Message() {
+    }
+
+    public List<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(List<Profile> profiles) {
+        this.profiles = profiles;
     }
 
     public String getProfile() {
@@ -84,6 +94,5 @@ public class Message implements Serializable {
     public String toString() {
         return "Message{" + "id=" + id + ", toProfile=" + toProfile + ", fromProfile=" + fromProfile + ", command=" + command + ", content=" + content + ", profile=" + profile + '}';
     }
-    
-    
+
 }

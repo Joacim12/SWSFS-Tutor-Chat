@@ -125,7 +125,7 @@ class App extends Component {
                                             <h4>Sound enabled:</h4>
                                         </div>
                                         <div className="col-md-9">
-                                            <input type="checkbox" onChange={this.handleCheckbox} checked={this.state.checked}/>
+                                            <input type="checkbox" onChange={this.handleCheckbox} checked={this.state.checked} value={this.state.checked}/>
                                             <br/>
                                             <br/>
                                             <button style={{margin:10}} className="btn btn-warning" onClick={this.updateUser} data-dismiss="modal">Ok</button>

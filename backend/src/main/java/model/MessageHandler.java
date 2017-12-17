@@ -35,7 +35,6 @@ public class MessageHandler {
      * @param message the message with the command
      */
     public void handleMessage(Message message) throws IOException, EncodeException {
-        System.out.println(message);
         switch (message.getCommand()) {
             case "message":
                 sendMessage(message);
@@ -71,7 +70,12 @@ public class MessageHandler {
                 Profile a = new Gson().fromJson(message.getProfile(), Profile.class);
                 Profile p = USERFACADE.getProfileById(a.getUsername());
                 p.setSoundEnabled(a.isSoundEnabled());
-                getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
+                p.setTutor(a.isTutor());
+                if (a.getSession() == null) {
+                    USERFACADE.updateProfile(p);
+                } else {
+                    getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
+                }
                 break;
             default:
                 System.out.println("something went wrong" + message);
@@ -91,7 +95,6 @@ public class MessageHandler {
     public void addUser(Profile dbUser) throws EncodeException, IOException {
         ONLINEPROFILES.add(dbUser);
         dbUser.getSession().getBasicRemote().sendObject(dbUser); // Sending the user to the client
-        System.out.println("user sent" + dbUser);
         if (dbUser.isTutor()) {
             USERFACADE.getProfiles().forEach(profile -> {
                 if (!profile.equals(dbUser) && profile.getToken() != null) {
@@ -223,9 +226,10 @@ public class MessageHandler {
     }
 
     private void sendGetUsersMessage(Message message) throws IOException, EncodeException {
-//        if (getUser(message.getFromProfile()).isTutor()) {
-//            getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(getUserFacade().getProfiles());
-//        }
+        if (getUser(message.getFromProfile()).isTutor()) {
+            message.setProfiles(USERFACADE.getProfiles());
+            getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message);
+        }
     }
 
     // From here everything is more or less getters and setters

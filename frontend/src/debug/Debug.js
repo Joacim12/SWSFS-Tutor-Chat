@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-
-const webSocket = require("../../package.json").webSocket;
+import webSocket from "../js/websocket.js";
 
 class Debug extends Component {
 
@@ -12,7 +11,7 @@ class Debug extends Component {
     }
 
     componentDidMount() {
-        let connection = new WebSocket(webSocket + "debug");
+        let connection = new WebSocket(webSocket + "debug/null");
         this.setState({connection: connection}, () => {
             connection.onmessage = this.handleMessage;
         })

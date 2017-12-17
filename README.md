@@ -42,7 +42,7 @@ Hvis man kalder serveren på 127.0.0.1/chat/debug/null bliver der registreret en
 
 Hvis man kalder serveren på 127.0.0.1/chat/register/null vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
 
-Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn/gyldigtoken vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn/gyldigtoken og FireBaseAuth.java klassen ikke returnerer null vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
 
 Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 

@@ -9,8 +9,6 @@
 
 [Kommandoer](#kommandoer)  
 
-[Firebase](#firebase)
-
 [Logging](#logging) 
 
 [Forslag til manglende features](#forslag-til-features)
@@ -20,6 +18,8 @@
 [Tomcat](#tomcat) 
 
 [MySQL](#mysql)
+
+[Firebase](#firebase)
 
 [Getting the code / Local development](#local-development) 
 

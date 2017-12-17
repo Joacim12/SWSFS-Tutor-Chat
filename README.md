@@ -93,9 +93,30 @@ Vil sende filen "fil.jpg" fra "user" til "tutor", max filstørrelse 25mb.
 Vil blive send til "user" og i frontenden vil brugerens send til blive sat til "tutor"
 - release
 ```javascript 
-{"toProfile":"server","fromProfile":"Tutor","toProfile":"server","command":"release","content":"user"} 
+{"toProfile":"server","fromProfile":"Tutor","command":"release","content":"user"} 
 ```
 sætter "user"'s assigned attribut til "" og tilføjer "user" til notGettingHelp listen i backend + sender en besked til alle tutorer om at der er en bruger der ikke får hjælp.
+- removeTutor
+```javascript
+{"toProfile":"user","command":"removeTutor"} 
+```
+Finder brugeren "user" og sætter "assignedTutor" til "".
+- getUsers
+```javascript
+{"fromProfile":"tutor","command":"getUsers"} 
+```
+Returnerer en liste af alle brugere til "tutor"
+- updateUser
+```javascript
+{"fromProfile":"userprofile","command":"updateUser","profile":{"userprofile"}} 
+```
+tager hele profilen "userprofile" som json, og merger med "userprofile" i databasen, og returnerer herefter den opdaterede profil.
+- getTutors
+```javascript
+{"command":"getTutors"} 
+```
+Returnerer antal tutorer online.
+
 
 ## Firebase
 I frontenden samt backenden bliver firebase brugt. 

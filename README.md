@@ -341,6 +341,7 @@ public void sendTutorNotification(String token, String to,String tutor) {
 key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
      
 ## Local development
+- Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
@@ -348,25 +349,12 @@ key'en der bliver brugt her, kan findes her: https://console.firebase.google.com
 - Højreklik på projektet vælg new og find Persistence unit, kald den "PU"
 - Lav en ny database connection til den database vi lavede tidligere med brugeren tutorChat (Brug MySQL Connector)
 - Under Source Packages vælg pakken facade, og åben klassen UserFacade
-- Kør filen og den opretter en bruger 'Tutor', samt 'Elev'
+- Kør filen og den opretter en bruger 'test@test.dk', samt de nødvendige tables i databasen.
+- Start projekteti tomcat.
+- Åben frontend mappen i en terminal og kør npm install, dette vil installere de nødvendige dependencies som firebase, og react.
+- Åben websocket.js (placeret i js mappen) og udskift ```"ws://localhost:8084/TutorChat/chat/";``` med ip'en på din lokale tomcat server.
 - Du er nu live, og klar til at bygge videre på systemet :-)
 - Frontenden / React delen er i frontend mappen, og backenden i backend mappen.
-
-## Deploy til server
-- Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
-- naviger til frontend mappen, og kør npm install via en terminal.
-- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "ws://192.168.0.103:8080/chat/", gem ændringer.
-- Samt "homepage" til din url på serveren, i mit tilfælde "http://192.168.0.103:8080".
-- åben App.js og i Router tagget fjern "basename={"/TutorChat"}
-- kør npm run build
-- i netbeans hvor du har projektet åbent find web pages og fjern alt udover 'META-INF' og 'WEB-INF'
-- kopier herefter indholdet af build mappen fra frontend ind under webpages
-- build projektet i netbeans
-- Naviger til din servers ip:8080C/manager
-- Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
-- Undeploy alt udover /manager
-- Find ROOT.war filen i din target mappe, og deploy den.
-- Systemet kan nu tilgås på 192:168.0.103:8080 !!
 
 ## Proxy nginx
 #### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx
@@ -442,7 +430,7 @@ skriv ```sudo nano /etc/nginx/nginx.conf``` og tilføj linjen ``` client_max_bod
 
 
 ## Domæne
-Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domænet var gratis på dot.tk
+Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi's ip, i deres dns panel via a name, domænet var gratis på dot.tk
 
 #### SSL Certifikat
 Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
@@ -505,3 +493,13 @@ UsePAM no
 - Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
 eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```
 
+## Deploy til server
+- åben websocket.js og skift websocket urlen til din servers ip adresse, i mit tilfælde "wss://cphbusiness.tk/chat/", gem ændringer.
+- kør npm run build
+- kopier indholdet af build mappen, til nginx http mappe(noget alla ```scp ~/local_dir/* tutorchat@cphbusiness.tk:/var/www/html/``` burde gøre det) bemærk i package.json har jeg lavet et custom script der køres via "npm run deploy" hvilket automatiserer dette, ved at tilgå /var/www/html/ som et netværksdrev. 
+- build projektet i netbeans
+- Naviger til din servers ip/manager, muligvis du skal trykke ctrl + r, hvis du har deployet noget allerede, da react router ellers tager over.
+- Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
+- Undeploy alt udover /manager
+- Find ROOT.war filen i din target mappe, og deploy den.
+- Systemet kan nu tilgås på cphbusiness.tk !!

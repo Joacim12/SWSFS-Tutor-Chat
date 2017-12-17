@@ -134,7 +134,7 @@ Returnerer antal tutorer online.
 Ovenstående eksempel sender først filen til en modtager, og herefter sender den en besked til modtager med filnavnet, når serveren modtager besked to, sender den filen i en besked til modtager.
 
 ## Logging
-Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:
+De logs jeg har kigget på, når jeg har skulle fejlsøge er:
 - nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
 Den kan findes her: ``` /var/log/nginx/acces.log ```
 - Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
@@ -144,22 +144,20 @@ Den kan findes her: https://cphbusiness.tk/debug
 
 ## Forslag til flere features
 - Statistik
+- En chatbot / AI som der automatisk kan svare på spørgsmål.
 - Debugger kunne godt bruge flere funktioner, fx hente specifikke chat logs, se meddelelser sendt fra serveren, antal brugere logget ind osv.
-- Admin/manager del, hvor man kan redigere brugere osv.
-- Diverse error handling
-- Lyd virker ikke ordenligt (loader ikke nogle gange)
-- Se om der er nogle tutorer online
-- Tests!
-- Sikre frontenden.
-- Settings i frontenden.
-- Bedre support i edge/safari
+- Admin/manager del, kan p.t kun sætte en bruger til at være tutor samt slå lyd til og fra.
+- Diverse error handling, fx hvis man har stået på loading skærmen i 10 sekunder, burde man nok blive smidt tilbage til start.
+- Lyd virker ikke ordenligt i firefox.
+- Flere tests
 - droppe mysql database og bruge firebase.
 - En app?
 
 ## How to part:
 #### Set up a system for local development:
 
-Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
+Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com), programmer som nginx og java kører en ældre version på raspbian jessie, så ikke alle guides på nettet kan følges.
+
 sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
 skriv ```adduser tutorchat```
 efterfulgt af ```usermod -a -G sudo tutorchat``` for at tilføje den nye bruger til sudo gruppen.
@@ -219,7 +217,7 @@ Restart=always
 WantedBy=multi-user.target
 ```
 tryk ctrl +x for at gemme.
-  - skriv kommando: sudo systemctl daemoen-reload
+  - skriv kommando: sudo systemctl daemon-reload
   - skriv kommando: sudo systemctl start tomcat
   - skriv kommando: sudo systemctl status tomcat
    
@@ -231,7 +229,7 @@ tryk ctrl +x for at gemme.
   ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
   - tryk ctrl + x for at lukke og gemme.
   - skriv kommando: sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
-    -  Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
+    -  Her fjern Valve tagget, eller udkommenter det med ```<!--<tag/>-->```
     -  skriv kommando: sudo systemctl restart tomcat   
       Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
       Hvis alt virker husk at slå tomcat til at boote ved hver start:

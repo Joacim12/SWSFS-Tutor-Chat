@@ -117,7 +117,7 @@ tager hele profilen "userprofile" som json, og merger med "userprofile" i databa
 ```
 Returnerer antal tutorer online.
 
-For at sende en besked kan følgende javascript skrives:
+####For at sende en besked kan følgende javascript skrives:
 ```javascript
    sendFile = () => {
         var file = this.state.file[0];

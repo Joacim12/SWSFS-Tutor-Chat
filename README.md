@@ -117,8 +117,21 @@ tager hele profilen "userprofile" som json, og merger med "userprofile" i databa
 ```
 Returnerer antal tutorer online.
 
+For at sende en besked kan følgende javascript skrives:
+```javascript
+   sendFile = () => {
+        var file = this.state.file[0];
+        let msg = JSON.stringify({
+            "toProfile": this.state.toProfile,
+            'fromProfile': this.state.user.username,
+            'command': 'file',
+            'content': file.name
+        });
+        getConnection().send(file);
+        getConnection().send(msg);
+```
 
-
+Ovenstående eksempel sender først filen til en modtager, og herefter sender den en besked til modtager med filnavnet, når serveren modtager besked to, sender den filen i en besked til modtager.
 
 ## Logging
 Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:

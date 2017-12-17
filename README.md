@@ -157,9 +157,9 @@ Den kan findes her: https://cphbusiness.tk/debug
 - Admin/manager del, kan p.t kun sætte en bruger til at være tutor samt slå lyd til og fra.
 - Diverse error handling, fx hvis man har stået på loading skærmen i 10 sekunder, burde man nok blive smidt tilbage til start.
 - Lyd virker ikke ordenligt i firefox.
-- Flere tests
 - droppe mysql database og bruge firebase.
 - En app?
+- Skrive tests
 
 ## How to part:
 #### Set up a system for local development:

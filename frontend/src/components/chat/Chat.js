@@ -125,7 +125,6 @@ class Chat extends Component {
 
     getTutorsOnline = () =>{
         let msg = JSON.stringify({
-            "toProfile": "",
             'fromProfile': isLoggedIn().email,
             'command': "getTutors"
         });

@@ -11,17 +11,27 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- *
+ * Class responsible for authenticating users via firebase.
  * @author joacim
  */
 public class FireBaseAuth {
     private static final String BASE_URL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/";
     private String firebaseKey;
     
+    /**
+     * my api key, you can create your own in the firebase console.
+     */
     public FireBaseAuth() {
        firebaseKey = "AIzaSyClmWE8_C1mdd1HHgZpPXCEuk4niJaUNVU";
     }
     
+    
+    /**
+     * 
+     * @param token should be a freshly generated token, that a client receives 
+     * when succesfully logging into frontend
+     * @return the clients email, if the token is valid, else null
+     */
     public String validateUser(String token) {
         HttpURLConnection urlRequest = null;
         String email = null;

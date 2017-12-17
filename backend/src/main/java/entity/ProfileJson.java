@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * a class that removes the session attribute from the Profile class, 
  * else gson gets caught in a circular reference.
- * @author joaci
+ * @author joacim
  */
 public class ProfileJson {
 
@@ -19,7 +19,7 @@ public class ProfileJson {
     /**
      * 
      * @param profile takes in a normal profile and converts it to a "ProfileJson"
-     * which only difference is the Json attribute.
+     * which only difference is the session attribute removed.
      */
     public ProfileJson(Profile profile) {
         this.username=profile.getUsername();

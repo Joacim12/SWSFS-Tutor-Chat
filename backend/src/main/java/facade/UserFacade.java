@@ -28,7 +28,7 @@ public class UserFacade {
     public void tester() {
         Profile p = new Profile();
         p.setMessages(new ArrayList());
-        p.setUsername("tutor@cphbusiness.tk");
+        p.setUsername("test@test.dk");
         p.setTutor(Boolean.TRUE);
         createProfile(p);
     }

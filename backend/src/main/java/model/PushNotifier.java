@@ -8,7 +8,7 @@ import org.apache.http.impl.client.HttpClients;
 
 /**
  *
- * @author joaci
+ * @author joacim
  */
 public class PushNotifier {
     

@@ -12,7 +12,7 @@ import {closeConnection, getConnection, getUser, setConnection, setUser} from ".
 class Chat extends Component {
 
     state = {
-        users: [], textArea: '',
+        users: [], textArea: '',onlineUsers:"",
         user: '', message: '',
         disconnected: false, toProfile: null,
         command: 'needHelp', usersNeedHelp: [],
@@ -25,9 +25,9 @@ class Chat extends Component {
             this.setState({redirect: true})
         } else {
             if (getConnection() === undefined) {
-                console.log(this.props.location.state.token)
                 setConnection(this.props.location.state.username+"/"+this.props.location.state.token);
                 getConnection().onmessage = this.handleMessage;
+
             } else{
                 getConnection().onmessage = this.handleMessage;
                 this.setState({user:getUser(),loading:false});
@@ -57,7 +57,12 @@ class Chat extends Component {
             if (message.username) {
                 setUser(message);
                 // We received our user object, let's set loading to false.
-                this.setState({user: message, loading: false})
+                this.setState({user: message, loading: false});
+                this.getTutorsOnline();
+                return;
+            }
+            if(message.command==="onlineUsers"){
+                this.setState({onlineUsers:message.content});
                 return;
             }
             if (message.command === 'needHelp') {
@@ -118,6 +123,15 @@ class Chat extends Component {
         getConnection().send(msg)
     }
 
+    getTutorsOnline = () =>{
+        let msg = JSON.stringify({
+            "toProfile": "",
+            'fromProfile': isLoggedIn().email,
+            'command': "getTutors"
+        });
+        getConnection().send(msg);
+    }
+
     renderNeedsHelp = () => {
         if (this.state.usersNeedHelp.length >= 1) {
             let needsHelp = this.state.usersNeedHelp.map((user, index) => {
@@ -161,6 +175,7 @@ class Chat extends Component {
         if (this.state.message.length >= 1) {
             getConnection().send(msg)
         }
+        this.getTutorsOnline();
     }
 
     handleChange = (e) => {
@@ -223,6 +238,7 @@ class Chat extends Component {
                             <br/>
                         </div>
                         <div className="col-3">
+                            {"Tutors Online: " + this.state.onlineUsers}
                             {this.state.users.length > 0 ?
                                 <UserList users={this.state.users} handleList={this.handleList}
                                           handleDc={this.handleDc}/> : ""}

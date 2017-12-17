@@ -67,15 +67,10 @@ public class MessageHandler {
                 sendGetUsersMessage(message);
                 break;
             case "updateUser":
-                Profile a = new Gson().fromJson(message.getProfile(), Profile.class);
-                Profile p = USERFACADE.getProfileById(a.getUsername());
-                p.setSoundEnabled(a.isSoundEnabled());
-                p.setTutor(a.isTutor());
-                if (a.getSession() == null) {
-                    USERFACADE.updateProfile(p);
-                } else {
-                    getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
-                }
+                updateUser(message);
+                break;
+            case "getTutors":
+                sendGetTutors();
                 break;
             default:
                 System.out.println("something went wrong" + message);
@@ -96,6 +91,7 @@ public class MessageHandler {
         ONLINEPROFILES.add(dbUser);
         dbUser.getSession().getBasicRemote().sendObject(dbUser); // Sending the user to the client
         if (dbUser.isTutor()) {
+            sendGetTutors();
             USERFACADE.getProfiles().forEach(profile -> {
                 if (!profile.equals(dbUser) && profile.getToken() != null) {
                     pushNotifier.sendTutorNotification(profile.getToken(), profile.getUsername(), dbUser.getUsername());
@@ -229,6 +225,27 @@ public class MessageHandler {
         if (getUser(message.getFromProfile()).isTutor()) {
             message.setProfiles(USERFACADE.getProfiles());
             getUser(message.getFromProfile()).getSession().getBasicRemote().sendObject(message);
+        }
+    }
+
+    private void updateUser(Message message) throws IOException, EncodeException {
+        Profile a = new Gson().fromJson(message.getProfile(), Profile.class);
+        Profile p = USERFACADE.getProfileById(a.getUsername());
+        p.setSoundEnabled(a.isSoundEnabled());
+        p.setTutor(a.isTutor());
+        if (getUser(a.getUsername()).getSession() == null) {
+            USERFACADE.updateProfile(p);
+        } else {
+            getUser(a.getUsername()).getSession().getBasicRemote().sendObject(USERFACADE.updateProfile(p));
+        }
+    }
+
+    public void sendGetTutors() throws IOException, EncodeException {
+        Message onlineUsers = new Message();
+        onlineUsers.setCommand("onlineUsers");
+        onlineUsers.setContent(getTutors().size() + "");
+        for (Profile profile : ONLINEPROFILES) {
+            profile.getSession().getBasicRemote().sendObject(onlineUsers);
         }
     }
 

@@ -1,6 +1,6 @@
 let connection;
-let webSocket = "wss://cphbusiness.tk/chat/";
-// let webSocket = "ws://localhost:8084/TutorChat/chat/";
+// let webSocket = "wss://cphbusiness.tk/chat/";
+let webSocket = "ws://localhost:8084/TutorChat/chat/";
 let user;
 
 export function setConnection(userAndToken) {

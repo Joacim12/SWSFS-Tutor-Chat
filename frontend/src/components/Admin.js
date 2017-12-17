@@ -32,7 +32,6 @@ class Admin extends Component {
      */
     handleMessage = (message) => {
         let msg = JSON.parse(message.data);
-        console.log(msg);
         if (msg.command === "getUsers") {
             this.setState({profiles: msg.profiles,loading:false})
         }
@@ -63,7 +62,6 @@ class Admin extends Component {
             'content': "",
             'profile': JSON.stringify(profile)
         });
-        console.log(profile);
         getConnection().send(msg);
     };
 
@@ -82,7 +80,6 @@ class Admin extends Component {
     }
 
     render=()=> {
-        console.log(this.state.profiles)
         if (this.state.redirect) {
             return (
                 <Redirect to={"/"}/>

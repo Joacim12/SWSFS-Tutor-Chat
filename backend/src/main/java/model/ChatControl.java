@@ -48,7 +48,6 @@ public class ChatControl {
     public void onOpen(Session session, @PathParam("param") String param,
             @PathParam("token") String token, EndpointConfig conf) throws EncodeException, IOException {
         param = param.toLowerCase();
-        System.out.println(param);
         if (param.equals("debug")) {    // IMPORTANT!! outcomment this in production
             debug.setSession(session);  // IMPORTANT!! outcomment this in production
         }                               // IMPORTANT!! outcomment this in production

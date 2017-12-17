@@ -9,8 +9,6 @@
 
 [Kommandoer](#kommandoer)  
 
-[Firebase](#firebase)
-
 [Logging](#logging) 
 
 [Forslag til manglende features](#forslag-til-features)
@@ -20,6 +18,8 @@
 [Tomcat](#tomcat) 
 
 [MySQL](#mysql)
+
+[Firebase](#firebase)
 
 [Getting the code / Local development](#local-development) 
 
@@ -35,20 +35,20 @@
 Dette er et chat system, hvor en elev kan kan skrive et spørgsmål og herefter kan en tutor se spørgsmålet, og hvis de føler de kan svare på det, vælge spørgsmålet og starte en chat med eleven.
 
 Projektet er bygget op med en Java backend med jpa og en mysql database, en ReactJs frontend, og Firebase til authentication.
-Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}
+Når java delen bliver startet åbner den en websocket på 127.0.0.1/chat/{parameter}/{token}
 
 Lige nu er der tre parametre systemet "lytter" efter, "register", "debug" ellers "{brugernavn}"
-Hvis man kalder serveren på 127.0.0.1/chat/debug bliver der registreret en debgger session, hvor alle chat beskeder samt brugere der logger ind/ud bliver sendt til.
+Hvis man kalder serveren på 127.0.0.1/chat/debug/null bliver der registreret en debgger session, hvor alle indgående chat beskeder samt brugere der logger ind/ud bliver sendt til.
 
-Hvis man kalder serveren på 127.0.0.1/chat/register vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
+Hvis man kalder serveren på 127.0.0.1/chat/register/null vil der blive åbnet en besked, og herefter lytter serveren efter en besked, med kommandoen "createUser" når den kommer vil der blive oprettet en ny bruger med det brugernavn der står en beskedens content.
 
-Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
+Hvis man kalder serveren på 127.0.0.1/chat/etbrugernavn/gyldigtoken og FireBaseAuth.java klassen ikke returnerer null vil brugeren blive forbundet til serveren og tilføjet til en statisk liste med online brugere. Nu lytter serveren efter beskeder sendt i json format fra brugeren.
 
 Det hele er bygget op omkring en Message klasse, den har følgende attributter:
 
-| toProfile | fromProfile | command | content |
-| --- | --- | --- | --- |
-| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden |
+| toProfile | fromProfile | command | content | profile | profiles |
+| --- | --- | --- | --- | --- | --- |
+| Hvem beskeden er til | Hvem afsenderen er | Kommando fx 'file' | Indholdet af beskeden | en profil, kunne være brugeren selv | en liste af profiler, kunne fx være online tutorer
 
 ## Demo
 Åben https://cphbusiness.tk og log ind med demo@demo.dk // demo1234 skriv en besked og se den blive sendt til dig selv! åben evt en fane mere og login med tutor@cphbusiness.tk // tutor12 og se at du kan vælge demo@demo.dk og skrive/sende filer frem og tilbage + du får en push notifikation når tutor logger ind(Hvis du tillader meddelelser)
@@ -93,9 +93,174 @@ Vil sende filen "fil.jpg" fra "user" til "tutor", max filstørrelse 25mb.
 Vil blive send til "user" og i frontenden vil brugerens send til blive sat til "tutor"
 - release
 ```javascript 
-{"toProfile":"server","fromProfile":"Tutor","toProfile":"server","command":"release","content":"user"} 
+{"toProfile":"server","fromProfile":"Tutor","command":"release","content":"user"} 
 ```
 sætter "user"'s assigned attribut til "" og tilføjer "user" til notGettingHelp listen i backend + sender en besked til alle tutorer om at der er en bruger der ikke får hjælp.
+- removeTutor
+```javascript
+{"toProfile":"user","command":"removeTutor"} 
+```
+Finder brugeren "user" og sætter "assignedTutor" til "".
+- getUsers
+```javascript
+{"fromProfile":"tutor","command":"getUsers"} 
+```
+Returnerer en liste af alle brugere til "tutor"
+- updateUser
+```javascript
+{"fromProfile":"userprofile","command":"updateUser","profile":{"userprofile"}} 
+```
+tager hele profilen "userprofile" som json, og merger med "userprofile" i databasen, og returnerer herefter den opdaterede profil.
+- getTutors
+```javascript
+{"command":"getTutors"} 
+```
+Returnerer antal tutorer online.
+
+#### For at sende en besked kan følgende javascript skrives:
+```javascript
+   sendFile = () => {
+        var file = this.state.file[0];
+        let msg = JSON.stringify({
+            "toProfile": this.state.toProfile,
+            'fromProfile': this.state.user.username,
+            'command': 'file',
+            'content': file.name
+        });
+        getConnection().send(file);
+        getConnection().send(msg);
+```
+
+Ovenstående eksempel sender først filen til en modtager, og herefter sender den en besked til modtager med filnavnet, når serveren modtager besked to, sender den filen i en besked til modtager.
+
+## Oprettelse af brugere.
+Brugere kan selv registrere sig ved at trykke på "create user" på forsiden, dette vil oprette en normal bruger der kun har adgang til chat.
+- Opret administrator
+For at oprette en administrator bruger, åben filen firebase.js i frontenden, og indkommenter makeAdmin metoden, og tilføj en knap i foreksempel chat.js der kalder denne funktion, nu kan man logge ind med en standard bruger, og trykke på denne knap, og brugeren du er logget ind med bliver til admin, husk at fjerne knappen igen bagefter :)
+
+- Oprettelse af tutorer
+Som admin har man via menubaren adgang til en side der hedder admin, her kan man sætte et flueben i om en bruger skal være tutor.
+
+## Logging
+De logs jeg har kigget på, når jeg har skulle fejlsøge er:
+- nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
+Den kan findes her: ``` /var/log/nginx/acces.log ```
+- Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
+Den kan findes her: ``` /opt/tomcat/logs/catalina.out```
+- Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
+Den kan findes her: https://cphbusiness.tk/debug
+
+## Forslag til flere features
+- Statistik
+- En chatbot / AI som der automatisk kan svare på spørgsmål.
+- Debugger kunne godt bruge flere funktioner, fx hente specifikke chat logs, se meddelelser sendt fra serveren, antal brugere logget ind osv.
+- Admin/manager del, kan p.t kun sætte en bruger til at være tutor samt slå lyd til og fra.
+- Diverse error handling, fx hvis man har stået på loading skærmen i 10 sekunder, burde man nok blive smidt tilbage til start.
+- Lyd virker ikke ordenligt i firefox.
+- droppe mysql database og bruge firebase.
+- En app?
+- Skrive tests
+
+## How to part:
+#### Set up a system for local development:
+
+Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com), programmer som nginx og java kører en ældre version på raspbian jessie, så ikke alle guides på nettet kan følges.
+
+sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
+skriv ```adduser tutorchat```
+efterfulgt af ```usermod -a -G sudo tutorchat``` for at tilføje den nye bruger til sudo gruppen.
+
+## TOMCAT
+ - log ind på din server vha ```-ssh brugernavn@ipadresse```
+ - sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
+ - installer java: ```sudo apt-get install default-jdk```
+ #### lav en tomcatuser:
+ - skriv kommando: sudo groupadd tomcat
+ - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+ - download og installer tomcat
+ - find linket til den seneste tar.gz fil fra: https://tomcat.apache.org/download-80.cgi under binary distributions og så core
+ - skriv kommando: cd /tmp
+ - skriv kommando: curl -O http://ftp.download-by.net/apache/tomcat/tomcat-8/v8.5.24/bin/apache-tomcat-8.5.24.tar.gz
+ - skriv kommando: sudo mkdir /opt/tomcat
+ - skriv kommando: sudo tar xzvf apache-tomcat-8.5.24.tar.gz -C /opt/tomcat --strip-components=1
+ #### Opdater tomcats tilladelser:
+   - skriv kommando: cd /opt/tomcat
+   - skriv kommando: sudo chgrp -R tomcat /opt/tomcat (Giver tomcat gruppen ejerskab over tomcat og undermapper)
+   - skriv kommando: sudo chmod -R g+r conf
+   - skriv kommando: sudo chmod g+x conf
+   - skriv kommando: sudo chown -R tomcat webapps/ work/ temp/ logs/
+ #### Sæt tomcat op til at køre som en service:
+   Start med at finde ud af hvor JAVA_HOME er, 
+   - skriv kommando: sudo update-java-alternatives -l
+   
+   i mit tilfælde er outputtet: **jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
+   så mit JAVA_HOME er: **/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
+   - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
+     - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
+```Shell
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=network.target
+
+[Service]
+Type=forking
+
+Environment=JAVA_HOME=**/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
+Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+Environment=CATALINA_HOME=/opt/tomcat
+Environment=CATALINA_BASE=/opt/tomcat
+Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+
+User=tomcat
+Group=tomcat
+UMask=0007
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+tryk ctrl +x for at gemme.
+  - skriv kommando: sudo systemctl daemon-reload
+  - skriv kommando: sudo systemctl start tomcat
+  - skriv kommando: sudo systemctl status tomcat
+   
+   Her skulle du gerne få en linje der er grøn og der står at tomcat kører :-)
+   
+#### Opret en bruger til tomcats webinterface:
+  - skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
+  - Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
+  ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
+  - tryk ctrl + x for at lukke og gemme.
+  - skriv kommando: sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
+    -  Her fjern Valve tagget, eller udkommenter det med ```<!--<tag/>-->```
+    -  skriv kommando: sudo systemctl restart tomcat   
+      Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
+      Hvis alt virker husk at slå tomcat til at boote ved hver start:
+     - skriv kommando: sudo systemctl enable tomcat
+     
+## MySQL
+- Skriv kommando: sudo apt-get install mysql-server
+- skriv kommando: mysql_secure_installation
+  - Fjern anonyme brugere
+  - Slå root login remotely fra
+  - Fjern test databaser
+  - Reload tabeller
+- Skriv kommando: mysql -u root -p
+- Skriv kommando: CREATE USER 'tutorChat'@'%' IDENTIFIED BY 'TutorLogin2017!';
+- Skriv kommando: CREATE DATABASE tutorchat;
+- Skriv kommando: GRANT ALL PRIVILEGES ON tutorchat.* TO 'tutorChat'@'%" IDENTIFIED BY 'TutorLogin2017!;
+- Skriv kommando: FLUSH PRIVILEGES;
+- Skriv kommando: sudo nano /etc/mysql/my.cnf
+- udkommenter bind address med #
+- Skriv kommando: sudo service mysql stop
+- Skriv kommando: sudo service mysql start
+
+- Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
 
 ## Firebase
 I frontenden samt backenden bliver firebase brugt. 
@@ -182,131 +347,9 @@ public void sendTutorNotification(String token, String to,String tutor) {
     }
 ```
 key'en der bliver brugt her, kan findes her: https://console.firebase.google.com/project/tutorchatcph/settings/cloudmessaging/
-
-## Logging
-Der er en del forskellige logs man kan kigge på, dem jeg har brugt mest er:
-- nginx's access.log for at se hvilke ip adresser der har tilgået min webserver, samt set hvad request de har sendt.
-Den kan findes her: ``` /var/log/nginx/acces.log ```
-- Så er der tomcat's catalina.out, der bliver alle fejlbeskeder fra backenden logget.
-Den kan findes her: ``` /opt/tomcat/logs/catalina.out```
-- Og så er der min egen debugger side hvor jeg kan se meddelelser der bliver sendt til serveren.
-Den kan findes her: https://cphbusiness.tk/debug
-
-## Forslag til flere features
-- Statistik
-- Debugger kunne godt bruge flere funktioner, fx hente specifikke chat logs, se meddelelser sendt fra serveren, antal brugere logget ind osv.
-- Admin/manager del, hvor man kan redigere brugere osv.
-- Diverse error handling
-- Lyd virker ikke ordenligt (loader ikke nogle gange)
-- Se om der er nogle tutorer online
-- Tests!
-- Sikre frontenden.
-- Settings i frontenden.
-- Bedre support i edge/safari
-- droppe mysql database og bruge firebase.
-- En app?
-
-## How to part:
-#### Set up a system for local development:
-
-Jeg bruger en raspberry pi, der kører debian 8 som server (Gør det nemmere for dig selv ved at leje en vps ved digitalocean.com)
-sørg for ikke at sætte det hele op med root useren, men lav en ny bruger først.
-skriv ```adduser tutorchat```
-efterfulgt af ```usermod -a -G sudo tutorchat``` for at tilføje den nye bruger til sudo gruppen.
-
-## TOMCAT
- - log ind på din server vha ```-ssh brugernavn@ipadresse```
- - sørg for at køre ```sudo apt-get update``` evt efterfulgt at ```sudo apt-get upgrade``` så den er opdateret.
- - installer java: ```sudo apt-get install default-jdk```
- #### lav en tomcatuser:
- - skriv kommando: sudo groupadd tomcat
- - skriv kommando: sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
- - download og installer tomcat
- - find linket til den seneste tar.gz fil fra: https://tomcat.apache.org/download-80.cgi under binary distributions og så core
- - skriv kommando: cd /tmp
- - skriv kommando: curl -O http://ftp.download-by.net/apache/tomcat/tomcat-8/v8.5.24/bin/apache-tomcat-8.5.24.tar.gz
- - skriv kommando: sudo mkdir /opt/tomcat
- - skriv kommando: sudo tar xzvf apache-tomcat-8.5.24.tar.gz -C /opt/tomcat --strip-components=1
- #### Opdater tomcats tilladelser:
-   - skriv kommando: cd /opt/tomcat
-   - skriv kommando: sudo chgrp -R tomcat /opt/tomcat (Giver tomcat gruppen ejerskab over tomcat og undermapper)
-   - skriv kommando: sudo chmod -R g+r conf
-   - skriv kommando: sudo chmod g+x conf
-   - skriv kommando: sudo chown -R tomcat webapps/ work/ temp/ logs/
- #### Sæt tomcat op til at køre som en service:
-   Start med at finde ud af hvor JAVA_HOME er, 
-   - skriv kommando: sudo update-java-alternatives -l
-   
-   i mit tilfælde er outputtet: **jdk-8-oracle-arm32-vfp-hflt 318 /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
-   så mit JAVA_HOME er: **/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
-   - skriv kommando: sudo nano /etc/systemd/system/tomcat.service 
-     - Kopier nedenstående(og husk at ret din JAVA_HOME variabel):
-```Shell
-[Unit]
-Description=Apache Tomcat Web Application Container
-After=network.target
-
-[Service]
-Type=forking
-
-Environment=JAVA_HOME=**/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt**
-Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
-Environment=CATALINA_HOME=/opt/tomcat
-Environment=CATALINA_BASE=/opt/tomcat
-Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
-Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
-
-ExecStart=/opt/tomcat/bin/startup.sh
-ExecStop=/opt/tomcat/bin/shutdown.sh
-
-User=tomcat
-Group=tomcat
-UMask=0007
-RestartSec=10
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-tryk ctrl +x for at gemme.
-  - skriv kommando: sudo systemctl daemoen-reload
-  - skriv kommando: sudo systemctl start tomcat
-  - skriv kommando: sudo systemctl status tomcat
-   
-   Her skulle du gerne få en linje der er grøn og der står at tomcat kører :-)
-   
-#### Opret en bruger til tomcats webinterface:
-  - skriv kommando:  sudo nano /opt/tomcat/conf/tomcat-users.xml
-  - Under tomcat-users tagget tilføj en linje med din bruger(Husk at rette bruger og kode til noget mere sikkert):
-  ```<user username="admin" password="password" roles="manager-gui,admin-gui"/> ```
-  - tryk ctrl + x for at lukke og gemme.
-  - skriv kommando: sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
-    -  Her fjern Valve tagget, eller udkommenter det med <!--<tag/>-->
-    -  skriv kommando: sudo systemctl restart tomcat   
-      Nu skulle du have adgang til tomcats webinterface! Tilgå din server i en browser og skriv port 8080 efter ip adresssen, nu skulle du meget gerne se en tomcat skærm :)
-      Hvis alt virker husk at slå tomcat til at boote ved hver start:
-     - skriv kommando: sudo systemctl enable tomcat
-     
-## MySQL
-- Skriv kommando: sudo apt-get install mysql-server
-- skriv kommando: mysql_secure_installation
-  - Fjern anonyme brugere
-  - Slå root login remotely fra
-  - Fjern test databaser
-  - Reload tabeller
-- Skriv kommando: mysql -u root -p
-- Skriv kommando: CREATE USER 'tutorChat'@'%' IDENTIFIED BY 'TutorLogin2017!';
-- Skriv kommando: CREATE DATABASE tutorchat;
-- Skriv kommando: GRANT ALL PRIVILEGES ON tutorchat.* TO 'tutorChat'@'%" IDENTIFIED BY 'TutorLogin2017!;
-- Skriv kommando: FLUSH PRIVILEGES;
-- Skriv kommando: sudo nano /etc/mysql/my.cnf
-- udkommenter bind address med #
-- Skriv kommando: sudo service mysql stop
-- Skriv kommando: sudo service mysql start
-
-- Åben mysql workbench og forbind til serveren(Kan hentes her: https://www.mysql.com/products/workbench/) for lettere at se data osv.
      
 ## Local development
+- Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
 - Start med at skrive git clone https://github.com/joacim12/SWSFS-Tutor-Chat.git i git bash
 - Start netbeans eller hvad IDE du nu bruger til at kode java med og åben backend mappen i den klonede mappe.
 - Vælg projektet og resolve problemer hvis der er nogle, og så kør clean and build.
@@ -314,25 +357,12 @@ tryk ctrl +x for at gemme.
 - Højreklik på projektet vælg new og find Persistence unit, kald den "PU"
 - Lav en ny database connection til den database vi lavede tidligere med brugeren tutorChat (Brug MySQL Connector)
 - Under Source Packages vælg pakken facade, og åben klassen UserFacade
-- Kør filen og den opretter en bruger 'Tutor', samt 'Elev'
+- Kør filen og den opretter en bruger 'test@test.dk', samt de nødvendige tables i databasen.
+- Start projekteti tomcat.
+- Åben frontend mappen i en terminal og kør npm install, dette vil installere de nødvendige dependencies som firebase, og react.
+- Åben websocket.js (placeret i js mappen) og udskift ```"ws://localhost:8084/TutorChat/chat/";``` med ip'en på din lokale tomcat server.
 - Du er nu live, og klar til at bygge videre på systemet :-)
 - Frontenden / React delen er i frontend mappen, og backenden i backend mappen.
-
-## Deploy til server
-- Sørg for at have npm installeret, kan hentes her: https://www.npmjs.com/
-- naviger til frontend mappen, og kør npm install via en terminal.
-- åben package.json og skift "serverURL":'url' til din servers ip adresse, i mit tilfælde "ws://192.168.0.103:8080/chat/", gem ændringer.
-- Samt "homepage" til din url på serveren, i mit tilfælde "http://192.168.0.103:8080".
-- åben App.js og i Router tagget fjern "basename={"/TutorChat"}
-- kør npm run build
-- i netbeans hvor du har projektet åbent find web pages og fjern alt udover 'META-INF' og 'WEB-INF'
-- kopier herefter indholdet af build mappen fra frontend ind under webpages
-- build projektet i netbeans
-- Naviger til din servers ip:8080C/manager
-- Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
-- Undeploy alt udover /manager
-- Find ROOT.war filen i din target mappe, og deploy den.
-- Systemet kan nu tilgås på 192:168.0.103:8080 !!
 
 ## Proxy nginx
 #### SSL er godt, og nemt at installere på nginx, så lad os bruge nginx
@@ -408,7 +438,7 @@ skriv ```sudo nano /etc/nginx/nginx.conf``` og tilføj linjen ``` client_max_bod
 
 
 ## Domæne
-Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi, domænet var gratis på dot.tk
+Jeg har registreret domænet cphbusiness.tk og peget på min raspberry pi's ip, i deres dns panel via a name, domænet var gratis på dot.tk
 
 #### SSL Certifikat
 Nu da jeg har et domæne kan jeg sætte ssl op, og bruge en wss websocket så alt data der bliver sendt er krypteret!
@@ -471,3 +501,13 @@ UsePAM no
 - Genstart ssh ``` sudo systemctl restart ssh ``` nu skulle det gerne kun være muligt at forbinde til din server med din public key.
 eksempel: ``` ssh -i ssh tutorchat@cphbusiness.tk```
 
+## Deploy til server
+- åben websocket.js og skift websocket urlen til din servers ip adresse, i mit tilfælde "wss://cphbusiness.tk/chat/", gem ændringer.
+- kør npm run build
+- kopier indholdet af build mappen, til nginx http mappe(noget alla ```scp ~/local_dir/* tutorchat@cphbusiness.tk:/var/www/html/``` burde gøre det) bemærk i package.json har jeg lavet et custom script der køres via "npm run deploy" hvilket automatiserer dette, ved at tilgå /var/www/html/ som et netværksdrev. 
+- build projektet i netbeans
+- Naviger til din servers ip/manager, muligvis du skal trykke ctrl + r, hvis du har deployet noget allerede, da react router ellers tager over.
+- Login med de credentials du angav da du redigerede /opt/tomcat/conf/tomcat-users.xml
+- Undeploy alt udover /manager
+- Find ROOT.war filen i din target mappe, og deploy den.
+- Systemet kan nu tilgås på cphbusiness.tk !!
